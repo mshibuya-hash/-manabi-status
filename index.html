@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 学びステータス</title>
+<style>
+  :root {
+    --bg: #fef1f2; --bg2: #fde8ea; --panel: #ffffff; --line: #f3d4d8; --line2: #ecc5ca;
+    --text: #3d2b2e; --sub: #9b8487; --red: #e8506b; --red-deep: #d13a56; --gold: #f5b942;
+    --hp: #5dca8a; --invest: #ef6a6a; --nagi: #4aa3e8; --world: #b07ae0; --word: #3fc098; --saying: #f5933f;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif;
+    color: var(--text); line-height: 1.6; padding: 14px; max-width: 560px; margin: 0 auto;
+    min-height: 100vh; position: relative; z-index: 0;
+  }
+  #bgLayer { position: fixed; inset: 0; z-index: -2; background: linear-gradient(180deg, #fef1f2 0%, #fef7f3 60%, #ffffff 100%); }
+  #bgImage { position: fixed; inset: 0; z-index: -1; background-size: cover; background-position: center; background-repeat: no-repeat; opacity: 0; transition: opacity 0.5s; pointer-events: none; }
+
+  .title-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding: 8px 14px; background: rgba(255,255,255,0.9); border-radius: 14px; backdrop-filter: blur(4px); }
+  .title-bar h1 { font-size: 19px; font-weight: 800; color: var(--red-deep); letter-spacing: 0.5px; }
+  .title-bar .sub { font-size: 11px; color: var(--sub); font-weight: 600; }
+
+  .trainer-card { background: rgba(255,255,255,0.94); border-radius: 22px; padding: 18px 20px; margin-bottom: 14px; box-shadow: 0 6px 20px rgba(232,80,107,0.12); position: relative; overflow: hidden; }
+  .trainer-card::before { content: ""; position: absolute; top: -40px; right: -40px; width: 160px; height: 160px; background: radial-gradient(circle, rgba(232,80,107,0.08) 0%, transparent 70%); border-radius: 50%; }
+  .trainer-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .avatar { width: 64px; height: 64px; border-radius: 18px; flex-shrink: 0; background: linear-gradient(135deg, var(--red), #f06f88); display: flex; align-items: center; justify-content: center; font-size: 30px; color: #fff; overflow: hidden; border: 3px solid #fff; box-shadow: 0 3px 10px rgba(232,80,107,0.3); cursor: pointer; position: relative; }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar .cam { position: absolute; bottom: 0; right: 0; background: rgba(0,0,0,0.45); width: 100%; font-size: 9px; text-align: center; padding: 1px 0; color: #fff; }
+  .trainer-meta { flex: 1; min-width: 0; }
+  .trainer-name { font-size: 16px; font-weight: 800; color: var(--red-deep); margin-bottom: 1px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+  .trainer-name .edit-mark { font-size: 11px; opacity: 0.5; }
+  .trainer-sub { font-size: 11px; color: var(--sub); cursor: pointer; }
+  .name-stats { display: flex; gap: 12px; margin-top: 7px; }
+  .name-stats .ns-item { display: flex; flex-direction: column; }
+  .name-stats .ns-v { font-size: 15px; font-weight: 900; line-height: 1; }
+  .name-stats .ns-v.red { color: var(--red-deep); } .name-stats .ns-v.fire { color: var(--saying); } .name-stats .ns-v.green { color: var(--word); }
+  .name-stats .ns-l { font-size: 8.5px; color: var(--sub); font-weight: 700; margin-top: 2px; }
+
+  .level-row { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
+  .level-num { font-size: 44px; font-weight: 900; color: var(--red); line-height: 0.9; flex-shrink: 0; min-width: 66px; text-align: center; }
+  .level-num .lv-label { display: block; font-size: 12px; font-weight: 700; color: var(--red); margin-top: 2px; }
+  .level-bar-area { flex: 1; }
+  .level-track { height: 14px; background: #f0dde0; border-radius: 99px; overflow: hidden; }
+  .level-fill { height: 100%; background: linear-gradient(90deg, var(--red), #f06f88); border-radius: 99px; transition: width 0.7s cubic-bezier(.22,1,.36,1); width: 0%; }
+  .level-xp-text { text-align: center; font-size: 13px; font-weight: 700; color: var(--text); margin-top: 6px; }
+  .rank-title { text-align: center; font-size: 12px; color: #c79a2e; font-weight: 700; margin-top: 8px; background: #fdf6e3; padding: 5px; border-radius: 10px; }
+
+  .asset-summary { display: flex; gap: 8px; margin-top: 10px; }
+  .asset-box { flex: 1; background: var(--bg); border-radius: 14px; padding: 10px 11px; }
+  .asset-box .ab-label { font-size: 10px; color: var(--sub); font-weight: 700; }
+  .asset-box .ab-amt { font-size: 16px; font-weight: 900; color: var(--text); margin-top: 2px; }
+  .asset-box .ab-pct { font-size: 11px; font-weight: 800; margin-top: 1px; }
+  .asset-box .ab-pct.pos { color: #d13a3a; } .asset-box .ab-pct.neg { color: #2a7bc0; }
+  .asset-total { background: linear-gradient(135deg,#fdf6e3,#fcefd0); border-radius: 14px; padding: 10px 14px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .asset-total .at-label { font-size: 11px; color: #a8842c; font-weight: 800; }
+  .asset-total .at-amt { font-size: 19px; font-weight: 900; color: #c79a2e; }
+  .asset-total .at-pct { font-size: 12px; font-weight: 800; margin-left: 6px; }
+  .asset-total .at-pct.pos { color: #d13a3a; } .asset-total .at-pct.neg { color: #2a7bc0; }
+
+  .section-label { font-size: 12px; color: var(--red-deep); font-weight: 800; letter-spacing: 1px; margin: 18px 0 8px; display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.9); border-radius: 10px; padding: 7px 12px; backdrop-filter: blur(4px); }
+  .section-label::before { content: ""; width: 4px; height: 14px; background: var(--red); border-radius: 2px; }
+  .section-label .mini-link { margin-left: auto; font-size: 10px; color: var(--red); font-weight: 700; cursor: pointer; letter-spacing: 0; }
+
+  .card-panel { background: rgba(255,255,255,0.94); border-radius: 22px; padding: 18px; box-shadow: 0 6px 20px rgba(232,80,107,0.1); }
+  .card-panel.no-bg { background: transparent; box-shadow: none; padding: 0; }
+  .radar-wrap { position: relative; width: 100%; max-width: 340px; margin: 0 auto; }
+  #radar { width: 100%; height: auto; display: block; }
+
+  .stat-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; background: var(--bg); border-radius: 12px; padding: 8px 11px; }
+  .legend-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+  .legend-name { font-size: 12px; font-weight: 700; flex: 1; }
+  .legend-val { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+  .total-power { margin-top: 14px; padding: 12px; background: linear-gradient(135deg, #fdf6e3, #fcefd0); border-radius: 14px; display: flex; justify-content: space-between; align-items: center; }
+  .total-power .label { font-size: 13px; color: #a8842c; font-weight: 700; }
+  .total-power .val { font-size: 24px; font-weight: 900; color: #e0a020; }
+
+  .fund-item { background: rgba(255,255,255,0.94); border-radius: 16px; padding: 13px 16px; margin-bottom: 10px; border-left: 4px solid #1a9e5c; box-shadow: 0 2px 10px rgba(26,158,92,0.1); }
+  .fund-item .fi-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .fund-item .fi-ball { font-size: 18px; }
+  .fund-item .fi-name { font-size: 13px; font-weight: 800; flex: 1; }
+  .fund-item .fi-pct { font-size: 17px; font-weight: 900; }
+  .fund-item .fi-pct.pos { color: #d13a3a; } .fund-item .fi-pct.neg { color: #2a7bc0; }
+  .fund-gauge { position: relative; height: 22px; background: #eef3ee; border-radius: 7px; overflow: hidden; margin-top: 4px; }
+  .fund-gauge .fg-base { position: absolute; top: -3px; bottom: -3px; width: 2px; background: rgba(0,0,0,0.3); }
+  .fund-gauge .fg-base .fg-lab { position: absolute; top: 3px; left: 4px; font-size: 8px; color: var(--sub); font-weight: 700; white-space: nowrap; }
+  .fund-gauge .fg-bar { position: absolute; top: 4px; bottom: 4px; border-radius: 5px; }
+  .fund-item .fi-sub { display: flex; justify-content: space-between; font-size: 10px; color: var(--sub); margin-top: 6px; font-weight: 600; }
+  .fund-item .fi-sub b { color: var(--text); font-weight: 800; }
+  .fund-item .fi-money { display: flex; align-items: stretch; gap: 6px; margin-top: 10px; }
+  .fund-item .fm-box { flex: 1; background: #f4faf6; border-radius: 10px; padding: 8px 6px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+  .fund-item .fm-l { font-size: 8.5px; color: var(--sub); font-weight: 700; }
+  .fund-item .fm-v { font-size: 13px; font-weight: 900; color: var(--text); margin-top: 3px; }
+  .fund-item .fm-v.pos { color: #1d8a5e; } .fund-item .fm-v.neg { color: #2a7bc0; } .fund-item .fm-v.total { color: #1d8a5e; }
+  .fund-item .fm-plus, .fund-item .fm-eq { display: flex; align-items: center; font-size: 14px; font-weight: 900; color: var(--sub); }
+
+  .div-summary { background: linear-gradient(135deg,#eafaf2,#d9f5e7); border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; }
+  .div-summary .ds-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .div-summary .ds-label { font-size: 12px; font-weight: 800; color: #1d8a5e; }
+  .div-summary .ds-total { font-size: 26px; font-weight: 900; color: #1d8a5e; }
+  .div-summary .ds-sub { font-size: 10.5px; color: #4a9c75; font-weight: 600; }
+  .div-cal { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top: 10px; }
+  .div-cal .dc-month { background: rgba(255,255,255,0.7); border-radius: 9px; padding: 6px 3px; text-align: center; }
+  .div-cal .dc-month.has { background: #fff; box-shadow: 0 2px 6px rgba(29,138,94,0.15); }
+  .div-cal .dc-m { font-size: 9px; color: var(--sub); font-weight: 700; }
+  .div-cal .dc-v { font-size: 10.5px; font-weight: 800; color: #1d8a5e; margin-top: 1px; min-height: 13px; }
+  .div-cal .dc-month.empty .dc-v { color: #cdd6d0; }
+
+  .box-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
+  .mon-cell { background: rgba(255,255,255,0.94); border-radius: 14px; cursor: pointer; border-left: 4px solid #ccc; transition: transform 0.1s; padding: 10px 12px; position: relative; box-shadow: 0 2px 8px rgba(232,80,107,0.06); }
+  .mon-cell:active { transform: scale(0.97); }
+  .mon-cell.cat-div { border-left-color: #4aa3e8; }
+  .mon-cell.cat-grow { border-left-color: #ef6a6a; }
+  .mon-cell.cat-index { border-left-color: #5dca8a; }
+  .mon-cell.cat-theme { border-left-color: #f5b942; }
+  .mon-cell .mc-top { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; flex-wrap: wrap; }
+  .mon-cell .mc-cat { font-size: 17px; font-weight: 800; padding: 3px 11px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
+  .mon-cell .mc-cat.cat-div { background: rgba(74,163,232,0.15); color: #2a7bc0; }
+  .mon-cell .mc-cat.cat-grow { background: rgba(239,106,106,0.15); color: #d13a3a; }
+  .mon-cell .mc-cat.cat-index { background: rgba(93,202,138,0.18); color: #1d8a5e; }
+  .mon-cell .mc-cat.cat-theme { background: rgba(245,185,66,0.2); color: #b8860b; }
+  .mon-cell .mc-ball { font-size: 16px; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; overflow: hidden; flex-shrink: 0; }
+  .mon-cell .mc-ball img { width: 100%; height: 100%; object-fit: cover; }
+  .mon-cell .mc-name { font-size: 17px; font-weight: 800; line-height: 1.15; flex: 1; min-width: 0; }
+  .mon-cell .mc-qty { font-size: 9px; color: var(--sub); font-weight: 700; }
+  .mon-cell .mc-pl { font-size: 18px; font-weight: 900; line-height: 1; margin-top: 2px; }
+  .mon-cell .mc-pl.pos { color: #d13a3a; } .mon-cell .mc-pl.neg { color: #2a7bc0; }
+  .mon-cell .mc-sub { display: flex; justify-content: space-between; font-size: 9.5px; color: var(--sub); margin-top: 5px; font-weight: 600; }
+  .mon-cell .mc-sub b { color: var(--text); font-weight: 800; }
+  .mon-cell .mc-div { font-size: 9.5px; color: #3fc098; font-weight: 800; margin-top: 3px; }
+  .box-empty { text-align: center; color: var(--sub); font-size: 12px; padding: 22px 8px; background: rgba(255,255,255,0.9); border-radius: 14px; }
+  .import-stock-btn { width: 100%; margin-top: 12px; background: linear-gradient(135deg,#4aa3e8,#6cb6ef); color:#fff; border:none; border-radius:14px; padding:13px; font-size:14px; font-weight:800; font-family:inherit; cursor:pointer; box-shadow:0 4px 12px rgba(74,163,232,0.3); }
+  .import-stock-btn:active { transform: scale(0.97); }
+
+  .modal-bg { position: fixed; inset: 0; background: rgba(40,20,25,0.55); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
+  .modal-bg.show { display: flex; }
+  .mon-modal { background: #fff; border-radius: 22px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; }
+  .mon-modal-head { background: linear-gradient(135deg, var(--red), #f06f88); color: #fff; padding: 16px 20px; border-radius: 22px 22px 0 0; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; }
+  .mon-modal-head .mh-left { display: flex; align-items: center; gap: 10px; }
+  .mon-modal-head .mh-icon { width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: 18px; overflow: hidden; flex-shrink: 0; cursor: pointer; position: relative; }
+  .mon-modal-head .mh-icon img { width: 100%; height: 100%; object-fit: cover; }
+  .mon-modal-head .mh-icon .mh-cam { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.4); font-size: 7px; text-align: center; color: #fff; padding: 1px 0; }
+  .mon-modal-head .mh-name { font-size: 18px; font-weight: 800; }
+  .mon-modal-head .mh-code { font-size: 11px; opacity: 0.85; }
+  .mon-modal-head .mh-close { background: rgba(255,255,255,0.25); border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; font-size: 16px; cursor: pointer; }
+  .mon-modal-body { padding: 18px 20px; }
+  .type-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .type-badge { font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 99px; color: #fff; }
+  .metric { margin-bottom: 16px; }
+  .metric-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .metric-label { font-size: 12px; font-weight: 800; color: var(--text); }
+  .metric-value { font-size: 17px; font-weight: 900; }
+  .metric-value.pos { color: #d13a3a; } .metric-value.neg { color: #2a7bc0; } .metric-value.neutral { color: var(--text); }
+  .gauge { position: relative; height: 26px; background: #f3eef0; border-radius: 8px; overflow: hidden; }
+  .gauge-mark { position: absolute; top: -3px; bottom: -3px; width: 2px; background: rgba(0,0,0,0.28); }
+  .gauge-mark .gm-label { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 8.5px; color: var(--sub); font-weight: 700; white-space: nowrap; }
+  .gauge-bar { position: absolute; top: 4px; bottom: 4px; border-radius: 5px; }
+  .gauge-note { font-size: 10px; color: var(--sub); margin-top: 5px; font-weight: 600; }
+  .gauge-band { position:absolute; top:0; bottom:0; }
+  .mon-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .mon-info { background: var(--bg); border-radius: 12px; padding: 9px 12px; }
+  .mon-info .il { font-size: 10px; color: var(--sub); font-weight: 600; }
+  .mon-info .iv { font-size: 15px; font-weight: 800; }
+  .mon-nature { margin-top: 14px; background: #fdf6e3; border-radius: 12px; padding: 11px 14px; }
+  .mon-nature .nl { font-size: 10px; color: #a8842c; font-weight: 700; }
+  .mon-nature .nv { font-size: 14px; font-weight: 800; color: #c79a2e; }
+
+  .input-card { background: rgba(255,255,255,0.94); border-radius: 22px; padding: 16px 18px; box-shadow: 0 6px 20px rgba(232,80,107,0.1); }
+  .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  input[type=date], select, textarea { background: var(--bg); border: 1.5px solid var(--line); border-radius: 12px; color: var(--text); font-family: inherit; font-size: 13px; padding: 10px 12px; }
+  input[type=date] { width: auto; } select { flex: 1; font-weight: 600; }
+  textarea { width: 100%; min-height: 56px; resize: vertical; margin-bottom: 10px; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--red); }
+  .feed-btn { width: 100%; background: linear-gradient(135deg, var(--red), #f06f88); color: #fff; border: none; border-radius: 14px; padding: 14px; font-size: 15px; font-weight: 800; font-family: inherit; cursor: pointer; box-shadow: 0 4px 12px rgba(232,80,107,0.35); }
+  .feed-btn:active { transform: scale(0.97); }
+  .tag-hint { font-size: 10.5px; color: var(--sub); margin-top: 9px; line-height: 1.5; }
+
+  .log-item { background: rgba(255,255,255,0.94); border-radius: 14px; padding: 11px 14px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(232,80,107,0.06); }
+  .log-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
+  .log-date { font-size: 10px; color: var(--sub); font-weight: 600; }
+  .log-tag { font-size: 10px; padding: 2px 9px; border-radius: 99px; font-weight: 700; }
+  .log-text { font-size: 13.5px; }
+  .log-del { margin-left: auto; background: none; border: none; color: var(--line2); cursor: pointer; font-size: 15px; padding: 0 3px; }
+
+  .img-settings { background: rgba(255,255,255,0.94); border-radius: 18px; padding: 14px 16px; margin-top: 10px; box-shadow: 0 4px 14px rgba(232,80,107,0.08); display: none; }
+  .img-settings.open { display: block; }
+  .img-set-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .img-set-row:last-child { margin-bottom: 0; }
+  .img-preview { width: 50px; height: 50px; border-radius: 12px; background: var(--bg); border: 1.5px solid var(--line); overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .img-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .img-set-label { flex: 1; } .img-set-label .t { font-size: 12.5px; font-weight: 700; } .img-set-label .d { font-size: 10px; color: var(--sub); }
+  .img-btn { background: var(--bg); border: 1.5px solid var(--line); border-radius: 10px; padding: 7px 12px; font-size: 11px; font-weight: 700; font-family: inherit; color: var(--red-deep); cursor: pointer; }
+  .img-btn.clear { color: var(--sub); }
+  .slider-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+  .slider-row label { font-size: 11px; font-weight: 700; color: var(--sub); min-width: 64px; }
+  .slider-row input[type=range] { flex: 1; }
+
+  .btn-row { display: flex; gap: 8px; margin-top: 14px; }
+  .util-btn { flex: 1; background: rgba(255,255,255,0.94); color: var(--red-deep); border: 1.5px solid var(--line); border-radius: 12px; padding: 12px; font-size: 12px; font-weight: 700; font-family: inherit; cursor: pointer; }
+  .util-btn:active { transform: scale(0.98); }
+  .empty { text-align: center; color: var(--sub); font-size: 12px; padding: 18px 0; }
+
+  .levelup-toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-120px); background: linear-gradient(135deg, var(--gold), #f0a830); color: #fff; padding: 16px 30px; border-radius: 16px; font-weight: 900; font-size: 17px; box-shadow: 0 10px 34px rgba(245,185,66,0.55); opacity: 0; transition: all 0.5s cubic-bezier(.22,1,.36,1); z-index: 300; text-align: center; }
+  .levelup-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .levelup-toast .sub { font-size: 12px; font-weight: 700; margin-top: 2px; }
+  .trainer-card.rank-bronze { box-shadow: 0 0 0 3px #cd7f32, 0 6px 20px rgba(205,127,50,0.3); }
+  .trainer-card.rank-silver { box-shadow: 0 0 0 3px #b0b8c4, 0 6px 22px rgba(176,184,196,0.4); }
+  .trainer-card.rank-gold { box-shadow: 0 0 0 3px #f5b942, 0 6px 26px rgba(245,185,66,0.5); }
+  .trainer-card.rank-rainbow { box-shadow: 0 0 0 3px transparent, 0 6px 30px rgba(232,80,107,0.35); background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(255,250,252,0.96)) padding-box, linear-gradient(120deg, #ef6a6a, #f5b942, #5dca8a, #4aa3e8, #b07ae0) border-box; border: 3px solid transparent; }
+  .rank-frame-label { display: inline-block; font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 99px; margin-left: 6px; vertical-align: middle; }
+  .rank-frame-label.bronze { background: #f5e6d3; color: #9c5a1e; }
+  .rank-frame-label.silver { background: #eef1f4; color: #6b7785; }
+  .rank-frame-label.gold { background: #fdf0cf; color: #b8860b; }
+  .rank-frame-label.rainbow { background: linear-gradient(120deg,#ef6a6a,#f5b942,#5dca8a,#4aa3e8,#b07ae0); color: #fff; }
+
+  @keyframes lvBurst { 0% { transform: translateX(-50%) translateY(0) scale(0.7); opacity: 0; } 20% { transform: translateX(-50%) translateY(0) scale(1.1); opacity: 1; } 80% { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; } 100% { transform: translateX(-50%) translateY(-20px) scale(0.95); opacity: 0; } }
+  .levelup-toast.show { animation: lvBurst 2.8s cubic-bezier(.22,1,.36,1) forwards; }
+  @keyframes sparkle { 0%,100% { opacity: 0; transform: scale(0.5) rotate(0deg); } 50% { opacity: 1; transform: scale(1.2) rotate(180deg); } }
+  .lv-spark { position: fixed; font-size: 24px; z-index: 299; pointer-events: none; animation: sparkle 1.2s ease-out forwards; }
+  @keyframes radarPulse { 0% { filter: drop-shadow(0 0 0 rgba(232,80,107,0)); } 50% { filter: drop-shadow(0 0 14px rgba(232,80,107,0.6)); } 100% { filter: drop-shadow(0 0 0 rgba(232,80,107,0)); } }
+  #radar.pulse { animation: radarPulse 1s ease-out; }
+
+  .gacha-modal { background: #fff; border-radius: 22px; width: 100%; max-width: 380px; overflow: hidden; }
+  .gacha-head { padding: 16px; text-align: center; color: #fff; font-weight: 900; font-size: 16px; }
+  .gacha-head.r-n { background: linear-gradient(135deg,#9b8487,#b4b2a9); }
+  .gacha-head.r-r { background: linear-gradient(135deg,#4aa3e8,#6cb6ef); }
+  .gacha-head.r-sr { background: linear-gradient(135deg,#b07ae0,#c89af0); }
+  .gacha-head.r-ssr { background: linear-gradient(135deg,#f5b942,#f0a830,#ef6a6a); }
+  .gacha-body { padding: 22px 24px; text-align: center; }
+  .gacha-rarity { font-size: 13px; font-weight: 900; margin-bottom: 10px; }
+  .gacha-rarity.r-n { color: #9b8487; } .gacha-rarity.r-r { color: #4aa3e8; } .gacha-rarity.r-sr { color: #b07ae0; } .gacha-rarity.r-ssr { color: #e0a020; }
+  .gacha-quote { font-size: 16px; font-weight: 800; line-height: 1.7; color: var(--text); margin-bottom: 12px; }
+  .gacha-who { font-size: 12px; color: var(--sub); font-weight: 700; margin-bottom: 18px; }
+  .gacha-close { background: linear-gradient(135deg,var(--red),#f06f88); color:#fff; border:none; border-radius:12px; padding:11px 28px; font-size:14px; font-weight:800; font-family:inherit; cursor:pointer; }
+  .gacha-new { display:inline-block; background:var(--red); color:#fff; font-size:9px; font-weight:800; padding:2px 8px; border-radius:99px; margin-bottom:8px; }
+
+  .quote-collection { background: rgba(255,255,255,0.94); border-radius: 16px; padding: 14px 16px; box-shadow: 0 4px 14px rgba(232,80,107,0.08); }
+  .qc-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 10px; }
+  .qc-item { background: var(--bg); border-radius: 10px; padding: 9px 12px; border-left: 3px solid #ccc; }
+  .qc-item.r-n { border-left-color: #b4b2a9; } .qc-item.r-r { border-left-color: #4aa3e8; } .qc-item.r-sr { border-left-color: #b07ae0; } .qc-item.r-ssr { border-left-color: #f5b942; }
+  .qc-q { font-size: 12px; font-weight: 700; }
+  .qc-w { font-size: 10px; color: var(--sub); margin-top: 2px; }
+  .qc-empty { text-align:center; color: var(--sub); font-size: 11px; padding: 12px; }
+
+  .footer-note { text-align: center; font-size: 10px; color: var(--sub); margin-top: 18px; line-height: 1.6; background: rgba(255,255,255,0.85); border-radius: 12px; padding: 10px 14px; backdrop-filter: blur(4px); }
+</style>
+</head>
+<body>
+
+<div id="bgLayer"></div>
+<div id="bgImage"></div>
+
+<div class="title-bar">
+  <h1>📊 学びステータス</h1>
+  <div class="sub">ながら日経 × 気づきメモ</div>
+</div>
+
+<div class="trainer-card">
+  <div class="trainer-top">
+    <div class="avatar" id="avatar" onclick="pickAvatar()">
+      <span id="avatarFallback">🥷</span>
+      <span class="cam">変更</span>
+    </div>
+    <div class="trainer-meta">
+      <div class="trainer-name" id="trainerName" onclick="editName()">澁谷トレーナー <span class="edit-mark">✎</span></div>
+      <div class="trainer-sub" id="trainerSub" onclick="editSub()">＆ 経済の相棒</div>
+      <div class="name-stats">
+        <div class="ns-item"><span class="ns-v red" id="mTotal">0</span><span class="ns-l">総気づき</span></div>
+        <div class="ns-item"><span class="ns-v fire" id="mStreak">0</span><span class="ns-l">連続日数</span></div>
+        <div class="ns-item"><span class="ns-v green" id="mBest">0</span><span class="ns-l">最高連続</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="level-row">
+    <div class="level-num"><span id="level">1</span><span class="lv-label">レベル</span></div>
+    <div class="level-bar-area">
+      <div class="level-track"><div class="level-fill" id="levelFill"></div></div>
+      <div class="level-xp-text" id="xpText">0 / 1</div>
+    </div>
+  </div>
+  <div class="rank-title" id="rankTitle">かけだし — 経済の世界に踏み出した</div>
+  <div id="assetSummary"></div>
+</div>
+
+<div class="section-label">きょうの きづき</div>
+<div class="input-card">
+  <div class="input-row">
+    <input type="date" id="d">
+    <select id="tag">
+      <option value="invest">📈 投資に効く（投資力↑）</option>
+      <option value="nagi">🍀 凪に効く（経営力↑）</option>
+      <option value="world">🌍 世界の動き（世界観↑）</option>
+      <option value="word">💡 知らない用語（知識力↑）</option>
+      <option value="saying">✨ 自分の格言（直感力↑）</option>
+    </select>
+  </div>
+  <textarea id="txt" placeholder="今日のながら日経で一番ピンときたこと（一行でOK）"></textarea>
+  <button class="feed-btn" onclick="add()">⚡ 気づきを記録（+1 EXP）</button>
+  <div class="tag-hint">💡 タグごとに伸びる能力が違う。バランスよく記録すると6角形が大きく育つ。継続力は連続日数で自動アップ。</div>
+</div>
+
+<div class="section-label">じぶんの のうりょく<span class="mini-link" onclick="toggleImgSettings()">🎨 画像設定</span></div>
+
+<div class="img-settings" id="imgSettings">
+  <div class="img-set-row">
+    <div class="img-preview" id="prevAvatar">🥷</div>
+    <div class="img-set-label"><div class="t">アイコン画像</div><div class="d">トレーナーカードに表示</div></div>
+    <button class="img-btn" onclick="pickAvatar()">選ぶ</button>
+    <button class="img-btn clear" onclick="clearAvatar()">消す</button>
+  </div>
+  <div class="img-set-row">
+    <div class="img-preview" id="prevBg">🖼</div>
+    <div class="img-set-label"><div class="t">背景画像</div><div class="d">画面全体に薄く表示</div></div>
+    <button class="img-btn" onclick="pickBg()">選ぶ</button>
+    <button class="img-btn clear" onclick="clearBg()">消す</button>
+  </div>
+  <div class="slider-row">
+    <label>背景の濃さ</label>
+    <input type="range" id="bgOpacity" min="0" max="50" value="14" oninput="setBgOpacity(this.value)">
+    <span id="bgOpacityVal" style="font-size:11px; font-weight:700; min-width:34px; text-align:right;">14%</span>
+  </div>
+</div>
+
+<input type="file" id="avatarFile" accept="image/*" style="display:none">
+<input type="file" id="bgFile" accept="image/*" style="display:none">
+
+<div class="card-panel" style="margin-top:8px;">
+  <div class="radar-wrap">
+    <svg id="radar" viewBox="0 0 340 320" role="img" aria-label="6つの能力のレーダーチャート"></svg>
+  </div>
+  <div class="stat-legend">
+    <div class="legend-item"><span class="legend-dot" style="background:var(--invest)"></span><span class="legend-name">投資力</span><span class="legend-val" id="val-invest" style="color:var(--invest)">5</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--nagi)"></span><span class="legend-name">経営力</span><span class="legend-val" id="val-nagi" style="color:var(--nagi)">5</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--world)"></span><span class="legend-name">世界観</span><span class="legend-val" id="val-world" style="color:var(--world)">5</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--word)"></span><span class="legend-name">知識力</span><span class="legend-val" id="val-word" style="color:var(--word)">5</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--saying)"></span><span class="legend-name">直感力</span><span class="legend-val" id="val-saying" style="color:var(--saying)">5</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--hp)"></span><span class="legend-name">継続力</span><span class="legend-val" id="val-streak" style="color:var(--hp)">10</span></div>
+  </div>
+  <div class="total-power">
+    <div class="label">そうごうりょく</div>
+    <div class="val" id="totalPower">40</div>
+  </div>
+</div>
+
+<div class="section-label">てもち — ほゆうしさん</div>
+<div class="card-panel no-bg">
+  <div id="assetDetail"></div>
+  <div id="fundArea"></div>
+  <div id="divSummary"></div>
+  <div class="box-grid" id="boxGrid"></div>
+  <button class="import-stock-btn" onclick="pickStockCsv()">📥 SBI証券CSVを取り込む</button>
+  <input type="file" id="stockCsvFile" accept=".csv" style="display:none">
+  <input type="file" id="stockIconFile" accept="image/*" style="display:none">
+  <div class="tag-hint" style="margin-top:8px; background:rgba(255,255,255,0.85); border-radius:10px; padding:8px 12px; backdrop-filter:blur(4px);">📦 銘柄をタップすると詳細指標。投信も自動で読み込まれ、上にまとめて表示されます。</div>
+</div>
+
+<div class="section-label">かくげん コレクション<span class="mini-link" id="quoteCount">0枚</span></div>
+<div class="quote-collection">
+  <div class="qc-empty" id="quoteEmpty">気づきを記録すると、たまにレアな投資格言カードが出ます💎</div>
+  <div class="qc-grid" id="quoteGrid"></div>
+</div>
+
+<div class="section-label">きろく ログ</div>
+<div id="log"></div>
+
+<div class="btn-row">
+  <button class="util-btn" onclick="doExport()">💾 バックアップ</button>
+  <button class="util-btn" onclick="doImport()">📂 読み込み</button>
+</div>
+<input type="file" id="importFile" accept="application/json" style="display:none">
+
+<div class="footer-note">
+  自分だけの秘密基地 🔒 データも画像もこの端末のブラウザに保存されます。<br>
+  機種変更・ブラウザ変更の前は「バックアップ」を忘れずに。
+</div>
+
+<div class="modal-bg" id="monModal" onclick="if(event.target===this)closeMon()">
+  <div class="mon-modal" id="monModalInner"></div>
+</div>
+
+<div class="modal-bg" id="gachaModal" onclick="if(event.target===this)closeGacha()">
+  <div class="gacha-modal" id="gachaModalInner"></div>
+</div>
+
+<div class="levelup-toast" id="levelup">
+  <div>⭐ レベルアップ！ ⭐</div>
+  <div class="sub" id="levelupSub"></div>
+</div>
+
+<script>
+const KEY = 'manabi_status_v2';
+const IMG_KEY = 'manabi_status_images_v1';
+const PROF_KEY = 'manabi_status_profile_v1';
+const STOCK_KEY = 'manabi_status_stocks_v1';
+const STOCKICON_KEY = 'manabi_status_stockicons_v1';
+const FUND_KEY = 'manabi_status_funds_v1';
+let data = { memos: [], bestStreak: 0 };
+let images = { avatar: null, bg: null, bgOpacity: 14 };
+let profile = { name: '澁谷トレーナー', sub: '＆ 経済の相棒' };
+let stocks = [];
+let stockIcons = {};
+let funds = { evalAmt:0, plAmt:0, plPct:0, items:[] };
+let collectedQuotes = [];
+const QUOTE_KEY = 'manabi_status_quotes_v1';
+
+const ranks = [
+  { min: 1,  name: 'かけだし',       title: '経済の世界に踏み出した' },
+  { min: 3,  name: 'みならい',       title: 'ニュースに慣れてきた' },
+  { min: 6,  name: 'かけだし投資家', title: '点と点が繋がり始めた' },
+  { min: 10, name: 'ちゅうけん',     title: '自分の意見を持てるように' },
+  { min: 15, name: 'アナリスト',     title: '流れが読めるようになった' },
+  { min: 22, name: 'ベテラン',       title: '経済の構造が見える' },
+  { min: 30, name: 'エキスパート',   title: '投資と経営が繋がった' },
+  { min: 42, name: 'ストラテジスト', title: '先を読む目を持つ' },
+  { min: 55, name: 'けんじゃ',       title: '経済を語れる人へ' },
+  { min: 75, name: 'グランドマスター', title: '伝説の域に到達' }
+];
+
+const axes = [
+  { key:'invest', label:'投資力', color:'#ef6a6a' },
+  { key:'nagi',   label:'経営力', color:'#4aa3e8' },
+  { key:'world',  label:'世界観', color:'#b07ae0' },
+  { key:'word',   label:'知識力', color:'#3fc098' },
+  { key:'saying', label:'直感力', color:'#f5933f' },
+  { key:'streak', label:'継続力', color:'#5dca8a' }
+];
+
+const stockMeta = {
+  '7011': { yield:0.6, per:32, cat:'成長利確型', sector:'防衛・機械', sectorColor:'#ef6a6a', traits:['防衛テーマ','国策'], payMonths:[6,12] },
+  '9432': { yield:3.6, per:12, cat:'配当ホールド型', sector:'通信', sectorColor:'#06b6d4', traits:['16期連続増配','安定配当'], payMonths:[6,12] },
+  '9434': { yield:5.1, per:16, cat:'配当ホールド型', sector:'通信', sectorColor:'#06b6d4', traits:['高配当'], payMonths:[6,12] },
+  '2914': { yield:5.0, per:14, cat:'配当ホールド型', sector:'食品', sectorColor:'#f59e0b', traits:['高配当','ディフェンシブ'], payMonths:[3,9] },
+  '4063': { yield:2.0, per:22, cat:'成長利確型', sector:'化学・半導体', sectorColor:'#84cc16', traits:['世界トップ','高M率'], payMonths:[6,12] },
+  '5713': { yield:4.0, per:11, cat:'成長利確型', sector:'非鉄金属', sectorColor:'#b07ae0', traits:['資源株'], payMonths:[6,12] },
+  '466A': { yield:0.5, per:0, cat:'テーマ型', sector:'防衛ETF', sectorColor:'#ef6a6a', traits:['テーマETF'], payMonths:[] },
+  '4452': { yield:2.5, per:28, cat:'配当ホールド型', sector:'化学・消費財', sectorColor:'#84cc16', traits:['36期連続増配'], payMonths:[3,9] },
+  '4503': { yield:6.2, per:18, cat:'配当ホールド型', sector:'医薬', sectorColor:'#ec4899', traits:['高配当','ディフェンシブ'], payMonths:[6,12] },
+  '7974': { yield:2.4, per:20, cat:'成長利確型', sector:'ゲーム', sectorColor:'#8b5cf6', traits:['IPコンテンツ'], payMonths:[6,12] },
+  '8001': { yield:3.0, per:11, cat:'テーマ型', sector:'商社', sectorColor:'#f59e0b', traits:['バフェット銘柄'], payMonths:[6,12] },
+  '8697': { yield:4.0, per:18, cat:'配当ホールド型', sector:'金融インフラ', sectorColor:'#3b82f6', traits:['優待あり','独占'], payMonths:[6,12] },
+  '9433': { yield:4.6, per:13, cat:'配当ホールド型', sector:'通信', sectorColor:'#06b6d4', traits:['23期連続増配','優待'], payMonths:[6,12] },
+  '2768': { yield:5.2, per:8,  cat:'テーマ型', sector:'商社', sectorColor:'#f59e0b', traits:['高配当'], payMonths:[6,12] },
+  '392A': { yield:0.8, per:0,  cat:'インデックス', sector:'米国ETF', sectorColor:'#1a9e5c', traits:['ハイテク30'], payMonths:[] },
+  '8593': { yield:4.2, per:11, cat:'配当ホールド型', sector:'リース・金融', sectorColor:'#3b82f6', traits:['26期連続増配'], payMonths:[6,12] },
+  '9984': { yield:0.5, per:18, cat:'成長利確型', sector:'投資・テック', sectorColor:'#8b5cf6', traits:['AI関連'], payMonths:[6,12] }
+};
+
+function load(){
+  try { const s = localStorage.getItem(KEY); if(s) data = JSON.parse(s); } catch(e){}
+  if(!data.memos) data.memos = []; if(!data.bestStreak) data.bestStreak = 0;
+  try { const si = localStorage.getItem(IMG_KEY); if(si) images = JSON.parse(si); } catch(e){}
+  if(images.bgOpacity===undefined) images.bgOpacity = 14;
+  try { const p = localStorage.getItem(PROF_KEY); if(p) profile = JSON.parse(p); } catch(e){}
+  try { const st = localStorage.getItem(STOCK_KEY); if(st) stocks = JSON.parse(st); } catch(e){}
+  try { const si2 = localStorage.getItem(STOCKICON_KEY); if(si2) stockIcons = JSON.parse(si2); } catch(e){}
+  try { const fd = localStorage.getItem(FUND_KEY); if(fd) funds = JSON.parse(fd); } catch(e){}
+  try { const qd = localStorage.getItem(QUOTE_KEY); if(qd) collectedQuotes = JSON.parse(qd); } catch(e){}
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(e){} }
+function saveImages(){ try { localStorage.setItem(IMG_KEY, JSON.stringify(images)); } catch(e){ alert('画像が大きすぎて保存できませんでした'); } }
+function saveProfile(){ try { localStorage.setItem(PROF_KEY, JSON.stringify(profile)); } catch(e){} }
+function saveStocks(){ try { localStorage.setItem(STOCK_KEY, JSON.stringify(stocks)); } catch(e){} }
+function saveStockIcons(){ try { localStorage.setItem(STOCKICON_KEY, JSON.stringify(stockIcons)); } catch(e){ alert('画像が大きすぎて保存できませんでした'); } }
+function saveFunds(){ try { localStorage.setItem(FUND_KEY, JSON.stringify(funds)); } catch(e){} }
+function saveQuotes(){ try { localStorage.setItem(QUOTE_KEY, JSON.stringify(collectedQuotes)); } catch(e){} }
+
+function editName(){ const v = prompt('トレーナー名を入力', profile.name); if(v!==null && v.trim()){ profile.name = v.trim(); saveProfile(); applyProfile(); } }
+function editSub(){ const v = prompt('二つ名（肩書き）を入力', profile.sub); if(v!==null){ profile.sub = v.trim(); saveProfile(); applyProfile(); } }
+function applyProfile(){ document.getElementById('trainerName').innerHTML = profile.name + ' <span class="edit-mark">✎</span>'; document.getElementById('trainerSub').textContent = profile.sub; }
+
+function fileToResizedDataURL(file, maxSize, cb){
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const img = new Image();
+    img.onload = function(){
+      let w = img.width, h = img.height;
+      if(w > h){ if(w > maxSize){ h = h*maxSize/w; w = maxSize; } } else { if(h > maxSize){ w = w*maxSize/h; h = maxSize; } }
+      const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      cb(canvas.toDataURL('image/jpeg', 0.82));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function pickAvatar(){ document.getElementById('avatarFile').click(); }
+function pickBg(){ document.getElementById('bgFile').click(); }
+document.getElementById('avatarFile').addEventListener('change', function(e){ const f = e.target.files[0]; if(!f) return; fileToResizedDataURL(f, 240, function(d){ images.avatar=d; saveImages(); applyImages(); }); });
+document.getElementById('bgFile').addEventListener('change', function(e){ const f = e.target.files[0]; if(!f) return; fileToResizedDataURL(f, 1080, function(d){ images.bg=d; saveImages(); applyImages(); }); });
+function clearAvatar(){ images.avatar=null; saveImages(); applyImages(); }
+function clearBg(){ images.bg=null; saveImages(); applyImages(); }
+function setBgOpacity(v){ images.bgOpacity=parseInt(v); document.getElementById('bgOpacityVal').textContent=v+'%'; saveImages(); applyImages(); }
+function applyImages(){
+  const av = document.getElementById('avatar'), fb = document.getElementById('avatarFallback'), prevAv = document.getElementById('prevAvatar');
+  if(images.avatar){ let im = av.querySelector('img'); if(!im){ im=document.createElement('img'); av.insertBefore(im, fb); } im.src=images.avatar; fb.style.display='none'; prevAv.innerHTML='<img src="'+images.avatar+'">'; }
+  else { const im=av.querySelector('img'); if(im) im.remove(); fb.style.display=''; prevAv.textContent='🥷'; }
+  const bgEl = document.getElementById('bgImage'), prevBg = document.getElementById('prevBg');
+  if(images.bg){ bgEl.style.backgroundImage='url('+images.bg+')'; bgEl.style.opacity=(images.bgOpacity/100); prevBg.innerHTML='<img src="'+images.bg+'">'; }
+  else { bgEl.style.backgroundImage=''; bgEl.style.opacity=0; prevBg.textContent='🖼'; }
+  document.getElementById('bgOpacity').value=images.bgOpacity; document.getElementById('bgOpacityVal').textContent=images.bgOpacity+'%';
+}
+function toggleImgSettings(){ document.getElementById('imgSettings').classList.toggle('open'); }
+
+function pickStockCsv(){ document.getElementById('stockCsvFile').click(); }
+document.getElementById('stockCsvFile').addEventListener('change', function(e){
+  const f = e.target.files[0]; if(!f) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    let text;
+    try { text = new TextDecoder('shift-jis').decode(new Uint8Array(ev.target.result)); }
+    catch(err){ try { text = new TextDecoder('utf-8').decode(new Uint8Array(ev.target.result)); } catch(e2){ alert('読み込み失敗'); return; } }
+    parseStockCsv(text);
+  };
+  reader.readAsArrayBuffer(f);
+});
+
+function parseStockCsv(text){
+  const lines = text.split(/\r?\n/);
+  const parsed = [];
+  const fundItems = [];
+  let fundEval = 0, fundPL = 0;
+  for(const line of lines){
+    const cells = line.split(',').map(function(c){ return c.replace(/^"|"$/g,'').trim(); });
+    if(cells.length < 9) continue;
+    const first = cells[0];
+    const m = first.match(/^(\d{3,4}[A-Z]?)\s+(.+)$/);
+    if(m){
+      const code = m[1], name = m[2];
+      const qty = parseFloat(cells[2]); const acq = parseFloat(cells[3]); const cur = parseFloat(cells[4]);
+      const plPct = parseFloat((cells[8]||'').replace(/\+/,'')); const evalAmt = parseFloat(cells[9]); const plAmt = parseFloat((cells[7]||'').replace(/\+/,''));
+      if(isNaN(qty)||isNaN(cur)) continue;
+      parsed.push({ code:code, name:name, qty:qty, acq:acq, cur:cur, plPct: isNaN(plPct)?0:plPct, evalAmt: isNaN(evalAmt)?qty*cur:evalAmt, plAmt: isNaN(plAmt)?0:plAmt });
+    } else if(/eMAXIS|ｅＭＡＸＩＳ|Ｓ＆Ｐ|オール|全世界|米国株式|ファンド|投信|インデックス/.test(first) && !/合計|ファンド名/.test(first)){
+      const plPct = parseFloat((cells[8]||'').replace(/\+/,'')); const evalAmt = parseFloat(cells[9]); const plAmt = parseFloat((cells[7]||'').replace(/\+/,''));
+      if(isNaN(evalAmt)) continue;
+      fundItems.push({ name: first, evalAmt: evalAmt, plAmt: isNaN(plAmt)?0:plAmt, plPct: isNaN(plPct)?0:plPct });
+      fundEval += evalAmt; fundPL += isNaN(plAmt)?0:plAmt;
+    }
+  }
+  if(parsed.length === 0 && fundItems.length === 0){ alert('銘柄が読み取れませんでした。SBIの「ポートフォリオ」CSVか確認してください。'); return; }
+  if(parsed.length > 0){ stocks = parsed; saveStocks(); }
+  if(fundItems.length > 0){ const fundCost = fundEval - fundPL; funds = { evalAmt: fundEval, plAmt: fundPL, plPct: fundCost>0 ? (fundPL/fundCost*100) : 0, items: fundItems }; saveFunds(); }
+  renderStocks();
+  alert('個別株 '+parsed.length+'銘柄、投信 '+fundItems.length+'件を取り込みました！📦');
+}
+
+function renderAssets(){
+  let stockEval = 0, stockPL = 0;
+  stocks.forEach(function(s){ stockEval += s.evalAmt; stockPL += (s.plAmt||0); });
+  const stockCost = stockEval - stockPL;
+  const stockPct = stockCost>0 ? (stockPL/stockCost*100) : 0;
+  const fundEval = funds.evalAmt||0, fundPL = funds.plAmt||0, fundPct = funds.plPct||0;
+  const totalEval = stockEval + fundEval;
+  const totalPL = stockPL + fundPL;
+  const totalCost = totalEval - totalPL;
+  const totalPct = totalCost>0 ? (totalPL/totalCost*100) : 0;
+
+  const sum = document.getElementById('assetSummary');
+  if(totalEval === 0){ sum.innerHTML = ''; }
+  else {
+    sum.innerHTML =
+      '<div class="asset-summary">'+
+        '<div class="asset-box"><div class="ab-label">🌳 投信</div>'+
+          '<div class="ab-amt">¥'+Math.round(fundEval).toLocaleString()+'</div>'+
+          '<div class="ab-pct '+(fundPL>=0?'pos':'neg')+'">'+(fundPL>=0?'+':'')+fundPct.toFixed(1)+'%</div></div>'+
+        '<div class="asset-box"><div class="ab-label">📈 個別株</div>'+
+          '<div class="ab-amt">¥'+Math.round(stockEval).toLocaleString()+'</div>'+
+          '<div class="ab-pct '+(stockPL>=0?'pos':'neg')+'">'+(stockPL>=0?'+':'')+stockPct.toFixed(1)+'%</div></div>'+
+      '</div>'+
+      '<div class="asset-total"><span class="at-label">💰 総資産</span>'+
+        '<span><span class="at-amt">¥'+Math.round(totalEval).toLocaleString()+'</span>'+
+        '<span class="at-pct '+(totalPL>=0?'pos':'neg')+'">'+(totalPL>=0?'+':'')+totalPct.toFixed(1)+'%</span></span></div>';
+  }
+
+  const fa = document.getElementById('fundArea');
+  if(!funds.items || funds.items.length === 0 || fundEval === 0){ fa.innerHTML = ''; }
+  else {
+    const gMin = -20, gMax = 30;
+    const zeroPos = (0 - gMin)/(gMax - gMin)*100;
+    const pctC = Math.max(gMin, Math.min(gMax, fundPct));
+    const pctPos = (pctC - gMin)/(gMax - gMin)*100;
+    let bar;
+    if(fundPct >= 0){ bar = '<div class="fg-bar" style="left:'+zeroPos+'%; width:'+(pctPos-zeroPos)+'%; background:#1a9e5c;"></div>'; }
+    else { bar = '<div class="fg-bar" style="left:'+pctPos+'%; width:'+(zeroPos-pctPos)+'%; background:#4aa3e8;"></div>'; }
+    const fundCost = fundEval - fundPL;
+    fa.innerHTML =
+      '<div class="fund-item">'+
+        '<div class="fi-top"><span class="fi-ball">🌳</span>'+
+          '<span class="fi-name">投資信託（コア資産）</span>'+
+          '<span class="fi-pct '+(fundPL>=0?'pos':'neg')+'">'+(fundPL>=0?'+':'')+fundPct.toFixed(1)+'%</span></div>'+
+        '<div class="fund-gauge">'+bar+'<div class="fg-base" style="left:'+zeroPos+'%;"><span class="fg-lab">元本</span></div></div>'+
+        '<div class="fi-money">'+
+          '<div class="fm-box"><div class="fm-l">積み立てた元本</div><div class="fm-v">¥'+Math.round(fundCost).toLocaleString()+'</div></div>'+
+          '<div class="fm-plus">+</div>'+
+          '<div class="fm-box"><div class="fm-l">ふえた額</div><div class="fm-v '+(fundPL>=0?'pos':'neg')+'">'+(fundPL>=0?'+':'−')+'¥'+Math.abs(Math.round(fundPL)).toLocaleString()+'</div></div>'+
+          '<div class="fm-eq">=</div>'+
+          '<div class="fm-box"><div class="fm-l">今の評価額</div><div class="fm-v total">¥'+Math.round(fundEval).toLocaleString()+'</div></div>'+
+        '</div>'+
+        '<div class="fi-sub" style="margin-top:8px;"><span>S&P500・オルカン等 '+funds.items.length+'件</span><span>長期積立て・引き出さない</span></div>'+
+      '</div>';
+  }
+}
+
+function renderStocks(){
+  renderAssets();
+  const grid = document.getElementById('boxGrid');
+  const summary = document.getElementById('divSummary');
+  if(stocks.length === 0){
+    grid.innerHTML = '<div class="box-empty" style="grid-column:1/-1;">まだ手持ちなし。<br>下のボタンからSBIのCSVを取り込もう📦</div>';
+    summary.innerHTML = ''; return;
+  }
+
+  let totalDiv = 0, totalEval = 0;
+  const monthly = [0,0,0,0,0,0,0,0,0,0,0,0];
+  stocks.forEach(function(s){
+    const meta = stockMeta[s.code] || { yield:0, payMonths:[] };
+    const annual = Math.round(s.cur * s.qty * (meta.yield||0) / 100);
+    s._annualDiv = annual; totalDiv += annual; totalEval += s.evalAmt;
+    const pm = meta.payMonths || [];
+    if(pm.length > 0 && annual > 0){ const per = annual / pm.length; pm.forEach(function(mo){ monthly[mo-1] += per; }); }
+  });
+
+  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  let calHtml = '';
+  for(let i=0;i<12;i++){
+    const v = Math.round(monthly[i]); const has = v > 0;
+    calHtml += '<div class="dc-month '+(has?'has':'empty')+'"><div class="dc-m">'+monthNames[i]+'</div><div class="dc-v">'+(has?('¥'+v.toLocaleString()):'–')+'</div></div>';
+  }
+  summary.innerHTML =
+    '<div class="div-summary">'+
+      '<div class="ds-top"><span class="ds-label">💴 個別株の年間配当（推定）</span><span class="ds-total">¥'+totalDiv.toLocaleString()+'</span></div>'+
+      '<div class="ds-sub">個別株評価額 ¥'+Math.round(totalEval).toLocaleString()+' ・ 平均利回り '+(totalEval>0?(totalDiv/totalEval*100).toFixed(2):'0')+'%　※概算・NISAは非課税</div>'+
+      '<div class="div-cal">'+calHtml+'</div>'+
+    '</div>';
+
+  grid.innerHTML = stocks.map(function(s, i){
+    const meta = stockMeta[s.code] || {};
+    const ball = meta.cat==='配当ホールド型' ? '🔵' : meta.cat==='成長利確型' ? '🔴' : meta.cat==='インデックス' ? '🟢' : '🟡';
+    const catcls = meta.cat==='配当ホールド型' ? 'cat-div' : meta.cat==='成長利確型' ? 'cat-grow' : meta.cat==='インデックス' ? 'cat-index' : 'cat-theme';
+    const plcls = s.plPct>=0 ? 'pos' : 'neg'; const sign = s.plPct>=0 ? '+' : '';
+    const yld = (meta.yield!==undefined && meta.yield>0) ? meta.yield+'%' : '—';
+    const div = s._annualDiv || 0;
+    const iconHtml = stockIcons[s.code] ? ('<img src="'+stockIcons[s.code]+'">') : ball;
+    return '<div class="mon-cell '+catcls+'" onclick="openMon('+i+')">'+
+      '<div class="mc-top"><span class="mc-ball">'+iconHtml+'</span><span class="mc-name">'+s.name+'</span><span class="mc-cat '+catcls+'">'+(meta.cat||'成長利確型')+'</span></div>'+
+      '<div class="mc-qty">'+s.qty+'株 ・ 取得¥'+s.acq.toLocaleString()+'</div>'+
+      '<div class="mc-pl '+plcls+'">'+sign+s.plPct.toFixed(1)+'%</div>'+
+      '<div class="mc-sub"><span>評価額 <b>¥'+Math.round(s.evalAmt).toLocaleString()+'</b></span><span>利回り <b>'+yld+'</b></span></div>'+
+      '<div class="mc-div">💴 年配当 ¥'+div.toLocaleString()+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+var currentIconCode = null;
+function pickStockIcon(code){ currentIconCode = code; document.getElementById('stockIconFile').click(); }
+function clearStockIcon(code){ delete stockIcons[code]; saveStockIcons(); renderStocks(); var idx=stocks.findIndex(function(x){return x.code===code;}); if(idx>=0) openMon(idx); }
+document.getElementById('stockIconFile').addEventListener('change', function(e){
+  var f = e.target.files[0]; if(!f || !currentIconCode) return;
+  fileToResizedDataURL(f, 160, function(durl){ stockIcons[currentIconCode] = durl; saveStockIcons(); renderStocks(); var idx = stocks.findIndex(function(x){ return x.code===currentIconCode; }); if(idx>=0) openMon(idx); });
+});
+
+function openMon(i){
+  const s = stocks[i];
+  const meta = stockMeta[s.code] || { yield:0, per:0, cat:'成長利確型', sector:'その他', sectorColor:'#9b8487', traits:[] };
+  const annualDiv = Math.round(s.cur * s.qty * (meta.yield||0) / 100);
+  const types = (meta.traits||[]).map(function(t){ return '<span class="type-badge" style="background:'+(meta.sectorColor||'#9b8487')+'">'+t+'</span>'; }).join('');
+  const sectorBadge = '<span class="type-badge" style="background:'+(meta.sectorColor||'#9b8487')+'">'+(meta.sector||'その他')+'</span>';
+
+  const plMin = -30, plMax = 45;
+  const zeroPos = (0 - plMin) / (plMax - plMin) * 100;
+  const plClamped = Math.max(plMin, Math.min(plMax, s.plPct));
+  const plPos = (plClamped - plMin) / (plMax - plMin) * 100;
+  let plGauge;
+  if(s.plPct >= 0){ plGauge = '<div class="gauge-bar" style="left:'+zeroPos+'%; width:'+(plPos-zeroPos)+'%; background:#ef6a6a;"></div>'; }
+  else { plGauge = '<div class="gauge-bar" style="left:'+plPos+'%; width:'+(zeroPos-plPos)+'%; background:#4aa3e8;"></div>'; }
+  const plMetric = '<div class="metric"><div class="metric-head"><span class="metric-label">📈 損益率</span><span class="metric-value '+(s.plPct>=0?'pos':'neg')+'">'+(s.plPct>=0?'+':'')+s.plPct.toFixed(1)+'%</span></div><div class="gauge">'+plGauge+'<div class="gauge-mark" style="left:'+zeroPos+'%;"><span class="gm-label">0%</span></div></div><div class="gauge-note">中央の線がゼロ。右にのびるほど利益、左は含み損</div></div>';
+
+  const yMax = 7; const yld = meta.yield || 0; const yPos = Math.min(100, yld / yMax * 100);
+  let yMarks = ''; [2,3,4].forEach(function(v){ const p = v/yMax*100; yMarks += '<div class="gauge-mark" style="left:'+p+'%;"><span class="gm-label">'+v+'%</span></div>'; });
+  const yColor = yld>=4 ? '#3fc098' : yld>=3 ? '#5dca8a' : yld>=2 ? '#86c98a' : '#c5d6b0';
+  const yMetric = '<div class="metric"><div class="metric-head"><span class="metric-label">💴 配当利回り</span><span class="metric-value neutral">'+(yld>0?yld+'%':'—')+'</span></div><div class="gauge"><div class="gauge-bar" style="left:0; width:'+yPos+'%; background:'+yColor+';"></div>'+yMarks+'</div><div class="gauge-note">目安ライン 2%・3%・4%。高いほどインカムが厚い</div></div>';
+
+  const piMetric = '<div class="metric"><div class="metric-head"><span class="metric-label">✨ 含み益</span><span class="metric-value '+(s.plAmt>=0?'pos':'neg')+'">'+(s.plAmt>=0?'プラス +¥':'マイナス −¥')+Math.abs(Math.round(s.plAmt)).toLocaleString()+'</span></div></div>';
+
+  const divMetric = '<div class="metric"><div class="metric-head"><span class="metric-label">💰 年間配当金（推定）</span><span class="metric-value neutral" style="color:#3fc098;"> ¥'+annualDiv.toLocaleString()+'</span></div><div class="gauge-note">'+s.qty+'株 × 利回り'+(yld||0)+'% の概算。NISAなら非課税</div></div>';
+
+  let perMetric;
+  if(meta.per && meta.per > 0){
+    const perMax = 35; const perPos = Math.min(100, meta.per / perMax * 100);
+    const band10 = 10/perMax*100, band15 = 15/perMax*100, band20 = 20/perMax*100;
+    const perColor = meta.per<=10 ? '#3fc098' : meta.per<=20 ? '#f5b942' : '#ef6a6a';
+    const perLabel = meta.per<=10 ? '非常に割安' : meta.per<=15 ? 'やや割安' : meta.per<=20 ? '標準的' : '割高め';
+    perMetric = '<div class="metric"><div class="metric-head"><span class="metric-label">⚖️ 割安度（PER）</span><span class="metric-value neutral" style="color:'+perColor+';">'+meta.per+'倍 ・ '+perLabel+'</span></div><div class="gauge"><div class="gauge-band" style="left:0; width:'+band10+'%; background:rgba(63,192,152,0.18);"></div><div class="gauge-band" style="left:'+band15+'%; width:'+(band20-band15)+'%; background:rgba(245,185,66,0.2);"></div><div class="gauge-bar" style="left:0; width:'+perPos+'%; background:'+perColor+';"></div><div class="gauge-mark" style="left:'+band10+'%;"><span class="gm-label">10倍</span></div><div class="gauge-mark" style="left:'+band15+'%;"><span class="gm-label">15</span></div><div class="gauge-mark" style="left:'+band20+'%;"><span class="gm-label">20</span></div></div><div class="gauge-note">緑帯=10倍以下は割安 / 黄帯=15〜20倍が標準 / それ以上は割高</div></div>';
+  } else {
+    perMetric = '<div class="metric"><div class="metric-head"><span class="metric-label">⚖️ 割安度（PER）</span><span class="metric-value neutral">—</span></div><div class="gauge-note">ETF・投信などはPERなし</div></div>';
+  }
+
+  const iconInner = stockIcons[s.code] ? ('<img src="'+stockIcons[s.code]+'">') : '🏢';
+  document.getElementById('monModalInner').innerHTML =
+    '<div class="mon-modal-head"><div class="mh-left">'+
+    '<div class="mh-icon" onclick="pickStockIcon(\''+s.code+'\')">'+iconInner+'<span class="mh-cam">変更</span></div>'+
+    '<div><div class="mh-name">'+s.name+'</div><div class="mh-code">No.'+s.code+' ・ '+s.qty+'株保有</div></div></div>'+
+    '<button class="mh-close" onclick="closeMon()">✕</button></div>'+
+    '<div class="mon-modal-body">'+
+    '<div class="type-row">'+sectorBadge+types+'</div>'+
+    plMetric + yMetric + piMetric + divMetric + perMetric +
+    '<div class="mon-info-grid">'+
+      '<div class="mon-info"><div class="il">現在値</div><div class="iv">¥'+s.cur.toLocaleString()+'</div></div>'+
+      '<div class="mon-info"><div class="il">取得単価</div><div class="iv">¥'+s.acq.toLocaleString()+'</div></div>'+
+    '</div>'+
+    '<div class="mon-nature"><div class="nl">せいかく（投資カテゴリ）</div><div class="nv">'+(meta.cat||'成長利確型')+'</div></div>'+
+    (stockIcons[s.code] ? '<div style="text-align:center;margin-top:10px;"><button class="img-btn clear" onclick="clearStockIcon(\''+s.code+'\')">アイコン画像を消す</button></div>' : '')+
+    '</div>';
+  document.getElementById('monModal').classList.add('show');
+}
+function closeMon(){ document.getElementById('monModal').classList.remove('show'); }
+
+function calcStreak(){
+  if(data.memos.length === 0) return 0;
+  const days = [...new Set(data.memos.map(function(m){return m.date;}))].sort().reverse();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const fmt = function(d){ return d.toISOString().slice(0,10); };
+  let cur = new Date(today), streak = 0;
+  const yest = new Date(today); yest.setDate(yest.getDate()-1);
+  if(days[0] !== fmt(today) && days[0] !== fmt(yest)) return 0;
+  if(days[0] === fmt(yest)) cur = yest;
+  for(const d of days){ if(d === fmt(cur)){ streak++; cur.setDate(cur.getDate()-1); } else if(new Date(d) < cur) break; }
+  return streak;
+}
+function getRank(total){ let r=ranks[0], idx=0; for(let i=0;i<ranks.length;i++){ if(total>=ranks[i].min){ r=ranks[i]; idx=i; } } return { r:r, idx:idx }; }
+function getStats(){
+  const c = { invest:0, nagi:0, world:0, word:0, saying:0 };
+  data.memos.forEach(function(m){ if(c[m.tag]!==undefined) c[m.tag]++; });
+  const streak = calcStreak();
+  return { invest:5+c.invest*3, nagi:5+c.nagi*3, world:5+c.world*3, word:5+c.word*3, saying:5+c.saying*3, streak:10+streak*2 };
+}
+function drawRadar(stats){
+  const cx=170, cy=155, R=105, maxVal=60, n=6; let svg='';
+  for(let ring=1;ring<=4;ring++){ const r=R*ring/4; let pts=[]; for(let i=0;i<n;i++){ const a=-Math.PI/2+i*2*Math.PI/n; pts.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1)); } svg+='<polygon points="'+pts.join(' ')+'" fill="none" stroke="#f0dde0" stroke-width="1"/>'; }
+  for(let i=0;i<n;i++){ const a=-Math.PI/2+i*2*Math.PI/n; svg+='<line x1="'+cx+'" y1="'+cy+'" x2="'+(cx+R*Math.cos(a)).toFixed(1)+'" y2="'+(cy+R*Math.sin(a)).toFixed(1)+'" stroke="#f0dde0" stroke-width="1"/>'; }
+  let dp=[]; for(let i=0;i<n;i++){ const a=-Math.PI/2+i*2*Math.PI/n; const v=Math.min(maxVal,stats[axes[i].key]); const r=R*v/maxVal; dp.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1)); }
+  svg+='<polygon points="'+dp.join(' ')+'" fill="rgba(232,80,107,0.22)" stroke="#e8506b" stroke-width="2.5" stroke-linejoin="round"/>';
+  for(let i=0;i<n;i++){ const a=-Math.PI/2+i*2*Math.PI/n; const v=Math.min(maxVal,stats[axes[i].key]); const r=R*v/maxVal; svg+='<circle cx="'+(cx+r*Math.cos(a)).toFixed(1)+'" cy="'+(cy+r*Math.sin(a)).toFixed(1)+'" r="4" fill="'+axes[i].color+'"/>'; }
+  for(let i=0;i<n;i++){ const a=-Math.PI/2+i*2*Math.PI/n; const lr=R+26; svg+='<text x="'+(cx+lr*Math.cos(a)).toFixed(1)+'" y="'+(cy+lr*Math.sin(a)+4).toFixed(1)+'" text-anchor="middle" font-size="13" font-weight="800" fill="'+axes[i].color+'">'+axes[i].label+'</text>'; }
+  document.getElementById('radar').innerHTML = svg;
+}
+let prevLevel = 1;
+function render(skipAnim){
+  const total = data.memos.length;
+  const streak = calcStreak();
+  if(streak > data.bestStreak){ data.bestStreak = streak; save(); }
+  const stats = getStats();
+  axes.forEach(function(a){ document.getElementById('val-'+a.key).textContent = stats[a.key]; });
+  document.getElementById('totalPower').textContent = axes.reduce(function(acc,a){ return acc+stats[a.key]; },0);
+  drawRadar(stats);
+  const rk = getRank(total); const level = rk.idx+1;
+  document.getElementById('level').textContent = level;
+  document.getElementById('rankTitle').textContent = rk.r.name + ' — ' + rk.r.title;
+  const next = ranks.find(function(rr){ return rr.min>total; });
+  if(next){ const span=next.min-rk.r.min, prog=total-rk.r.min; document.getElementById('levelFill').style.width=Math.round(prog/span*100)+'%'; document.getElementById('xpText').textContent=total+' / '+next.min+'（あと'+(next.min-total)+'個）'; }
+  else { document.getElementById('levelFill').style.width='100%'; document.getElementById('xpText').textContent='⭐ 最高ランク到達！'; }
+  document.getElementById('mTotal').textContent=total; document.getElementById('mStreak').textContent=streak; document.getElementById('mBest').textContent=data.bestStreak;
+  const tagStyle = { invest:{bg:'rgba(239,106,106,0.15)',c:'#d13a3a',label:'📈投資'}, nagi:{bg:'rgba(74,163,232,0.15)',c:'#2a7bc0',label:'🍀凪'}, world:{bg:'rgba(176,122,224,0.15)',c:'#8a4ec0',label:'🌍世界'}, word:{bg:'rgba(63,192,152,0.15)',c:'#26997a',label:'💡用語'}, saying:{bg:'rgba(245,147,63,0.15)',c:'#d1701a',label:'✨格言'} };
+  const log = document.getElementById('log');
+  if(data.memos.length===0){ log.innerHTML='<div class="empty">まだ記録なし。最初の気づきでレベルアップ！🌱</div>'; }
+  else { log.innerHTML=[...data.memos].reverse().slice(0,50).map(function(m){ const ts=tagStyle[m.tag]||tagStyle.word; return '<div class="log-item"><div class="log-meta"><span class="log-date">'+m.date+'</span><span class="log-tag" style="background:'+ts.bg+';color:'+ts.c+'">'+ts.label+'</span><button class="log-del" onclick="del('+m.id+')" aria-label="削除">✕</button></div><div class="log-text">'+m.text.replace(/</g,'&lt;')+'</div></div>'; }).join(''); }
+  const tp2 = axes.reduce(function(acc,a){ return acc+stats[a.key]; },0);
+  applyRankFrame(tp2);
+  if(!skipAnim && level>prevLevel){ showLevelUp(rk.r.name); const rd=document.getElementById('radar'); rd.classList.add('pulse'); setTimeout(function(){ rd.classList.remove('pulse'); },1000); }
+  prevLevel = level;
+}
+
+const quotePool = [
+  { r:'n', q:'安く買って、高く売る。', w:'投資の基本' },
+  { r:'n', q:'卵は一つのカゴに盛るな。', w:'分散投資の格言' },
+  { r:'n', q:'マーケットのタイミングは計れない。', w:'インデックス投資の教え' },
+  { r:'n', q:'時間こそが、複利の最大の味方。', w:'長期投資の心得' },
+  { r:'n', q:'安く買えるのは、皆が悲観している時だ。', w:'逆張りの基本' },
+  { r:'n', q:'分からないものには手を出すな。', w:'投資の鉄則' },
+  { r:'r', q:'他人が貪欲な時に恐れ、他人が恐れる時に貪欲であれ。', w:'ウォーレン・バフェット' },
+  { r:'r', q:'10年保有する気がないなら、10分も持つな。', w:'ウォーレン・バフェット' },
+  { r:'r', q:'リスクとは、自分が何をしているか分からないことだ。', w:'ウォーレン・バフェット' },
+  { r:'r', q:'価格とは支払うもの、価値とは得るもの。', w:'ウォーレン・バフェット' },
+  { r:'r', q:'投資家の最大の敵は、自分自身の感情である。', w:'ベンジャミン・グレアム' },
+  { r:'r', q:'下落相場でうろたえて売る者から、冷静な者へ富は移る。', w:'ウォーレン・バフェット' },
+  { r:'sr', q:'まず損をしないこと。次に、最初のルールを忘れないこと。', w:'ウォーレン・バフェット' },
+  { r:'sr', q:'素晴らしい企業を適正な価格で。平凡な企業を割安で買うより、ずっといい。', w:'ウォーレン・バフェット' },
+  { r:'sr', q:'市場は短期では投票機、長期では計量器である。', w:'ベンジャミン・グレアム' },
+  { r:'sr', q:'自分が何を持っているか、なぜ持っているかを知れ。', w:'ピーター・リンチ' },
+  { r:'sr', q:'干し草の山から針を探すな。山ごと買え。', w:'ジョン・ボーグル' },
+  { r:'ssr', q:'ルールその1、損をするな。ルールその2、ルール1を忘れるな。', w:'ウォーレン・バフェット' },
+  { r:'ssr', q:'潮が引いて初めて、誰が裸で泳いでいたかが分かる。', w:'ウォーレン・バフェット' },
+  { r:'ssr', q:'強気相場は悲観の中で生まれ、懐疑の中で育ち、楽観の中で成熟し、陶酔の中で消えていく。', w:'ジョン・テンプルトン' }
+];
+const rarityRate = { n:0.62, r:0.26, sr:0.10, ssr:0.02 };
+const rarityName = { n:'ノーマル', r:'レア ☆☆', sr:'スーパーレア ☆☆☆', ssr:'ウルトラレア ☆☆☆☆' };
+
+function rollGacha(){
+  if(Math.random() > 0.32) return null;
+  const x = Math.random();
+  let rarity = 'n', acc = 0;
+  for(const r of ['ssr','sr','r','n']){ acc += rarityRate[r]; if(x <= acc){ rarity = r; break; } }
+  const pool = quotePool.filter(function(p){ return p.r===rarity; });
+  const pick = pool[Math.floor(Math.random()*pool.length)];
+  return pick;
+}
+
+function showGacha(quote){
+  const isNew = !collectedQuotes.some(function(c){ return c.q===quote.q; });
+  if(isNew){ collectedQuotes.push(quote); saveQuotes(); renderQuotes(); }
+  const rcls = 'r-'+quote.r;
+  document.getElementById('gachaModalInner').innerHTML =
+    '<div class="gacha-head '+rcls+'">🎁 格言カード ゲット！</div>'+
+    '<div class="gacha-body">'+
+      (isNew ? '<span class="gacha-new">NEW!</span><br>' : '')+
+      '<div class="gacha-rarity '+rcls+'">'+rarityName[quote.r]+'</div>'+
+      '<div class="gacha-quote">「'+quote.q+'」</div>'+
+      '<div class="gacha-who">— '+quote.w+'</div>'+
+      '<button class="gacha-close" onclick="closeGacha()">しまう</button>'+
+    '</div>';
+  document.getElementById('gachaModal').classList.add('show');
+}
+function closeGacha(){ document.getElementById('gachaModal').classList.remove('show'); }
+
+function renderQuotes(){
+  const grid = document.getElementById('quoteGrid');
+  const empty = document.getElementById('quoteEmpty');
+  document.getElementById('quoteCount').textContent = collectedQuotes.length + '枚';
+  if(collectedQuotes.length === 0){ empty.style.display = 'block'; grid.innerHTML = ''; return; }
+  empty.style.display = 'none';
+  const order = { ssr:0, sr:1, r:2, n:3 };
+  const sorted = collectedQuotes.slice().sort(function(a,b){ return order[a.r]-order[b.r]; });
+  grid.innerHTML = sorted.map(function(c){
+    return '<div class="qc-item r-'+c.r+'"><div class="qc-q">「'+c.q+'」</div><div class="qc-w">— '+c.w+'</div></div>';
+  }).join('');
+}
+
+function applyRankFrame(totalPower){
+  const card = document.querySelector('.trainer-card');
+  card.classList.remove('rank-bronze','rank-silver','rank-gold','rank-rainbow');
+  const nameEl = document.getElementById('trainerName');
+  let oldLabel = nameEl.querySelector('.rank-frame-label');
+  if(oldLabel) oldLabel.remove();
+  let frame = '', flabel = '', fcls = '';
+  if(totalPower >= 240){ frame='rank-rainbow'; flabel='虹'; fcls='rainbow'; }
+  else if(totalPower >= 160){ frame='rank-gold'; flabel='金'; fcls='gold'; }
+  else if(totalPower >= 100){ frame='rank-silver'; flabel='銀'; fcls='silver'; }
+  else if(totalPower >= 60){ frame='rank-bronze'; flabel='銅'; fcls='bronze'; }
+  if(frame){ card.classList.add(frame); const sp = document.createElement('span'); sp.className = 'rank-frame-label '+fcls; sp.textContent = flabel+'ランク'; nameEl.appendChild(sp); }
+}
+
+function sparkleBurst(){
+  const sparks = ['✨','⭐','🌟','💫'];
+  for(let i=0;i<8;i++){
+    const s = document.createElement('div');
+    s.className = 'lv-spark';
+    s.textContent = sparks[i%sparks.length];
+    s.style.left = (20 + Math.random()*60) + '%';
+    s.style.top = (15 + Math.random()*40) + '%';
+    s.style.animationDelay = (Math.random()*0.4) + 's';
+    document.body.appendChild(s);
+    setTimeout(function(){ s.remove(); }, 1600);
+  }
+}
+
+function showLevelUp(name){ const t=document.getElementById('levelup'); document.getElementById('levelupSub').textContent='「'+name+'」にランクアップ！'; t.classList.add('show'); sparkleBurst(); setTimeout(function(){ t.classList.remove('show'); },2800); }
+function add(){
+  const d=document.getElementById('d').value, tag=document.getElementById('tag').value, txt=document.getElementById('txt').value.trim();
+  if(!d||!txt){ alert('日付と内容を入れてね'); return; }
+  data.memos.push({ id:Date.now(), date:d, tag:tag, text:txt }); save();
+  document.getElementById('txt').value=''; render();
+  const q = rollGacha();
+  if(q){ setTimeout(function(){ showGacha(q); }, 600); }
+}
+function del(id){ data.memos=data.memos.filter(function(m){ return m.id!==id; }); save(); render(true); }
+function doExport(){
+  const out = { data:data, images:images, profile:profile, stocks:stocks, stockIcons:stockIcons, funds:funds, quotes:collectedQuotes };
+  const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'}); const u=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=u; a.download='manabi_status_backup.json'; a.click(); URL.revokeObjectURL(u);
+}
+function doImport(){ document.getElementById('importFile').click(); }
+document.getElementById('importFile').addEventListener('change', function(e){
+  const f=e.target.files[0]; if(!f) return; const r=new FileReader();
+  r.onload=function(ev){ try {
+    const imp=JSON.parse(ev.target.result);
+    if(imp.data && imp.data.memos){ data=imp.data; if(imp.images)images=imp.images; if(imp.profile)profile=imp.profile; if(imp.stocks)stocks=imp.stocks; if(imp.stockIcons)stockIcons=imp.stockIcons; if(imp.funds)funds=imp.funds; if(imp.quotes)collectedQuotes=imp.quotes; save(); saveImages(); saveProfile(); saveStocks(); saveStockIcons(); saveFunds(); saveQuotes(); prevLevel=getRank(data.memos.length).idx+1; applyImages(); applyProfile(); renderStocks(); renderQuotes(); render(true); alert('読み込み完了！'); }
+    else if(imp.memos){ data=imp; save(); prevLevel=getRank(data.memos.length).idx+1; render(true); alert('読み込み完了！'); }
+    else alert('ファイル形式が違います');
+  } catch(err){ alert('読み込みに失敗しました'); } };
+  r.readAsText(f);
+});
+
+document.getElementById('d').value = new Date().toISOString().slice(0,10);
+load(); applyImages(); applyProfile(); renderStocks(); renderQuotes();
+prevLevel = getRank(data.memos.length).idx + 1;
+render(true);
+</script>
+</body>
+</html>

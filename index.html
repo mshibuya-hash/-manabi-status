@@ -129,6 +129,8 @@
   .mon-cell .mc-qty { font-size: 9px; color: var(--sub); font-weight: 700; }
   .mon-cell .mc-pl { font-size: 18px; font-weight: 900; line-height: 1; margin-top: 2px; }
   .mon-cell .mc-pl.pos { color: #d13a3a; } .mon-cell .mc-pl.neg { color: #2a7bc0; }
+  .mon-cell .mc-paywrap { display: flex; justify-content: flex-end; gap: 4px; margin-top: 6px; }
+  .mon-cell .mc-pay-item { min-width: 38px; text-align: center; font-size: 11px; font-weight: 800; padding: 3px 4px; border-radius: 99px; background: rgba(63,192,152,0.16); color: #1d8a5e; white-space: nowrap; }
   .mon-cell .mc-sub { display: flex; justify-content: space-between; font-size: 9.5px; color: var(--sub); margin-top: 5px; font-weight: 600; }
   .mon-cell .mc-sub b { color: var(--text); font-weight: 800; }
   .mon-cell .mc-div { font-size: 9.5px; color: #3fc098; font-weight: 800; margin-top: 3px; }
@@ -247,6 +249,101 @@
   .qc-empty { text-align:center; color: var(--sub); font-size: 11px; padding: 12px; }
 
   .footer-note { text-align: center; font-size: 10px; color: var(--sub); margin-top: 18px; line-height: 1.6; background: rgba(255,255,255,0.85); border-radius: 12px; padding: 10px 14px; backdrop-filter: blur(4px); }
+
+  /* ===== セクター分布 ===== */
+  .sector-dist { background: rgba(255,255,255,0.94); border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(232,80,107,0.08); }
+  .sd-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  .sd-title { font-size: 12px; font-weight: 800; color: var(--red-deep); }
+  .sd-sub { font-size: 10px; color: var(--sub); font-weight: 600; }
+  .sd-bar { display: flex; height: 22px; border-radius: 7px; overflow: hidden; margin-bottom: 12px; background: #f0dde0; }
+  .sd-seg { height: 100%; transition: width 0.6s cubic-bezier(.22,1,.36,1); }
+  .sd-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .sd-leg-item { display: flex; align-items: center; gap: 7px; background: var(--bg); border-radius: 10px; padding: 7px 10px; cursor: pointer; transition: transform 0.1s; }
+  .sd-leg-item:active { transform: scale(0.97); }
+  .sd-leg-dot { width: 18px; height: 18px; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+  .sd-leg-meta { flex: 1; min-width: 0; }
+  .sd-leg-name { font-size: 11px; font-weight: 800; line-height: 1.1; }
+  .sd-leg-pct { font-size: 9.5px; color: var(--sub); font-weight: 600; }
+
+  /* 業界カバレッジ */
+  .sd-head .cov-count { font-size: 12px; font-weight: 900; color: var(--red-deep); background: var(--bg); padding: 2px 11px; border-radius: 99px; }
+  .cov-summary { font-size: 10.5px; color: var(--sub); font-weight: 600; margin: 8px 0 14px; line-height: 1.6; background: var(--bg); border-radius: 10px; padding: 8px 11px; }
+  .cov-summary b { font-weight: 900; }
+  .cov-list { display: flex; flex-direction: column; gap: 9px; }
+  .cov-row { display: flex; align-items: center; gap: 10px; cursor: pointer; transition: transform 0.1s; }
+  .cov-row:active { transform: scale(0.98); }
+  .cov-row.is-empty { opacity: 0.5; }
+  .cov-emoji { width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .cov-mid { flex: 1; min-width: 0; }
+  .cov-row-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .cov-name { font-size: 12px; font-weight: 800; flex: 1; min-width: 0; }
+  .cov-char { font-size: 9px; color: var(--sub); font-weight: 700; }
+  .cov-figs { display: flex; align-items: baseline; gap: 7px; flex-shrink: 0; }
+  .cov-amt-big { font-size: 18px; font-weight: 900; color: var(--text); white-space: nowrap; }
+  .cov-right { font-size: 12.5px; font-weight: 900; color: var(--text); flex-shrink: 0; }
+  .cov-empty-badge { font-size: 9.5px; font-weight: 800; color: #2a7bc0; background: rgba(74,163,232,0.15); padding: 2px 9px; border-radius: 99px; }
+  .cov-track { height: 8px; background: #f0dde0; border-radius: 99px; overflow: hidden; margin-top: 4px; }
+  .cov-bar { height: 100%; border-radius: 99px; transition: width 0.6s cubic-bezier(.22,1,.36,1); }
+  .cov-amt { font-size: 9px; color: var(--sub); font-weight: 700; margin-top: 2px; }
+
+  /* ===== 業界ずかん ===== */
+  .zukan-intro { font-size: 10.5px; color: var(--sub); font-weight: 600; margin-bottom: 12px; line-height: 1.6; background: rgba(255,255,255,0.9); border-radius: 12px; padding: 10px 14px; backdrop-filter: blur(4px); }
+  .zukan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 14px; }
+  .zukan-card { background: rgba(255,255,255,0.94); border-radius: 14px; padding: 12px 13px; cursor: pointer; border-top: 4px solid #ccc; box-shadow: 0 2px 8px rgba(232,80,107,0.06); transition: transform 0.1s; }
+  .zukan-card:active { transform: scale(0.97); }
+  .zukan-card .zc-top { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .zukan-card .zc-emoji { font-size: 22px; }
+  .zukan-card .zc-name { font-size: 14px; font-weight: 900; line-height: 1.1; }
+  .zukan-card .zc-char { font-size: 9.5px; font-weight: 800; margin-bottom: 4px; }
+  .zukan-card .zc-desc { font-size: 10px; color: var(--sub); font-weight: 600; line-height: 1.4; }
+  .zukan-card .zc-tags { display: flex; gap: 4px; margin-top: 7px; flex-wrap: wrap; }
+  .zukan-card .zc-tag { font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 99px; }
+  .zukan-card .zc-tag.good { background: rgba(63,192,152,0.16); color: #1d8a5e; }
+  .zukan-card .zc-tag.bad { background: rgba(74,163,232,0.16); color: #2a7bc0; }
+
+  /* 相性マトリクス表 */
+  .matrix-wrap { background: rgba(255,255,255,0.94); border-radius: 16px; padding: 14px 12px; box-shadow: 0 2px 10px rgba(232,80,107,0.08); overflow-x: auto; }
+  .matrix-title { font-size: 12px; font-weight: 800; color: var(--red-deep); margin-bottom: 4px; padding: 0 4px; }
+  .matrix-note { font-size: 9.5px; color: var(--sub); font-weight: 600; margin-bottom: 10px; padding: 0 4px; line-height: 1.5; }
+  table.matrix { border-collapse: collapse; width: 100%; min-width: 380px; }
+  table.matrix th, table.matrix td { text-align: center; padding: 6px 4px; font-size: 10px; }
+  table.matrix thead th { font-weight: 800; color: var(--sub); font-size: 9.5px; border-bottom: 1.5px solid var(--line); }
+  table.matrix thead th .mh-emoji { font-size: 14px; display: block; }
+  table.matrix tbody th { text-align: left; font-weight: 800; color: var(--text); white-space: nowrap; padding-left: 6px; border-right: 1.5px solid var(--line); }
+  table.matrix tbody th .mt-emoji { margin-right: 3px; }
+  table.matrix tbody tr:nth-child(even) td { background: rgba(254,241,242,0.5); }
+  .mx-cell { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 7px; font-size: 13px; font-weight: 900; }
+  .mx-good { background: rgba(63,192,152,0.2); color: #1d8a5e; }
+  .mx-ok { background: rgba(245,185,66,0.18); color: #b8860b; }
+  .mx-bad { background: rgba(74,163,232,0.18); color: #2a7bc0; }
+
+  /* 図鑑モーダル */
+  .zukan-modal { background: #fff; border-radius: 22px; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; }
+  .zukan-modal-head { color: #fff; padding: 18px 20px; border-radius: 22px 22px 0 0; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; }
+  .zukan-modal-head .zh-left { display: flex; align-items: center; gap: 12px; }
+  .zukan-modal-head .zh-emoji { font-size: 32px; }
+  .zukan-modal-head .zh-name { font-size: 19px; font-weight: 900; }
+  .zukan-modal-head .zh-kind { font-size: 11px; opacity: 0.9; font-weight: 700; }
+  .zukan-modal-head .zh-close { background: rgba(255,255,255,0.25); border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; font-size: 16px; cursor: pointer; flex-shrink: 0; }
+  .zukan-modal-body { padding: 18px 20px; }
+  .zm-desc { font-size: 13px; line-height: 1.7; color: var(--text); margin-bottom: 16px; }
+  .zm-sec-title { font-size: 11px; font-weight: 800; color: var(--red-deep); margin: 16px 0 8px; letter-spacing: 0.5px; }
+  .zm-react { display: flex; flex-direction: column; gap: 7px; }
+  .zm-react-row { display: flex; align-items: center; gap: 10px; background: var(--bg); border-radius: 11px; padding: 9px 12px; }
+  .zm-react-emoji { font-size: 18px; flex-shrink: 0; }
+  .zm-react-label { flex: 1; font-size: 12px; font-weight: 700; }
+  .zm-react-badge { font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 99px; white-space: nowrap; }
+  .zm-react-badge.good { background: rgba(63,192,152,0.2); color: #1d8a5e; }
+  .zm-react-badge.ok { background: rgba(245,185,66,0.2); color: #b8860b; }
+  .zm-react-badge.bad { background: rgba(74,163,232,0.2); color: #2a7bc0; }
+  .zm-holdings { margin-top: 16px; }
+  .zm-hold-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg); border-radius: 10px; padding: 8px 12px; margin-bottom: 6px; }
+  .zm-hold-name { font-size: 12px; font-weight: 800; }
+  .zm-hold-amt { font-size: 11px; color: var(--sub); font-weight: 700; }
+  .zm-hold-empty { font-size: 11px; color: var(--sub); font-weight: 600; text-align: center; padding: 10px; background: var(--bg); border-radius: 10px; }
+  .zm-pair { margin-top: 16px; background: #fdf6e3; border-radius: 12px; padding: 12px 14px; }
+  .zm-pair-title { font-size: 11px; font-weight: 800; color: #a8842c; margin-bottom: 4px; }
+  .zm-pair-text { font-size: 11.5px; color: var(--text); font-weight: 600; line-height: 1.6; }
 </style>
 </head>
 <body>
@@ -351,11 +448,21 @@
   <div id="assetDetail"></div>
   <div id="fundArea"></div>
   <div id="divSummary"></div>
+  <div id="sectorDist"></div>
   <div class="box-grid" id="boxGrid"></div>
   <button class="import-stock-btn" onclick="pickStockCsv()">📥 SBI証券CSVを取り込む</button>
   <input type="file" id="stockCsvFile" accept=".csv" style="display:none">
   <input type="file" id="stockIconFile" accept="image/*" style="display:none">
   <div class="tag-hint" style="margin-top:8px; background:rgba(255,255,255,0.85); border-radius:10px; padding:8px 12px; backdrop-filter:blur(4px);">📦 銘柄をタップすると詳細指標。投信も自動で読み込まれ、上にまとめて表示されます。</div>
+</div>
+
+<div class="section-label">ぎょうかい ずかん（タイプ相性）</div>
+<div class="zukan-intro">🎴 株は業種ごとに「効きやすい局面」が違う。ポケモンのタイプ相性のように、円安・金利・好景気などにどう反応するかを覚えると、ニュースと株価がつながって見えてくる。カードをタップで詳細。</div>
+<div class="zukan-grid" id="zukanGrid"></div>
+<div class="matrix-wrap">
+  <div class="matrix-title">⚔️ タイプ相性ひょう</div>
+  <div class="matrix-note">◎=追い風（ばつぐん）／ ○=ふつう ／ ▼=向かい風（いまひとつ）。あくまで一般的な傾向の目安です。</div>
+  <div id="matrixArea"></div>
 </div>
 
 <div class="section-label">かくげん コレクション<span class="mini-link" id="quoteCount">0枚</span></div>
@@ -384,6 +491,10 @@
 
 <div class="modal-bg" id="gachaModal" onclick="if(event.target===this)closeGacha()">
   <div class="gacha-modal" id="gachaModalInner"></div>
+</div>
+
+<div class="modal-bg" id="zukanModal" onclick="if(event.target===this)closeZukan()">
+  <div class="zukan-modal" id="zukanModalInner"></div>
 </div>
 
 <div class="levelup-toast" id="levelup">
@@ -566,14 +677,14 @@ function renderAssets(){
       '<div class="asset-summary">'+
         '<div class="asset-box"><div class="ab-label">🌳 投信</div>'+
           '<div class="ab-amt">¥'+Math.round(fundEval).toLocaleString()+'</div>'+
-          '<div class="ab-pct '+(fundPL>=0?'pos':'neg')+'">'+(fundPL>=0?'+':'')+fundPct.toFixed(1)+'%</div></div>'+
+          '<div class="ab-pct '+(fundPL>=0?'pos':'neg')+'">'+(fundPL>=0?'+':'▲')+Math.abs(fundPct).toFixed(1)+'%</div></div>'+
         '<div class="asset-box"><div class="ab-label">📈 個別株</div>'+
           '<div class="ab-amt">¥'+Math.round(stockEval).toLocaleString()+'</div>'+
-          '<div class="ab-pct '+(stockPL>=0?'pos':'neg')+'">'+(stockPL>=0?'+':'')+stockPct.toFixed(1)+'%</div></div>'+
+          '<div class="ab-pct '+(stockPL>=0?'pos':'neg')+'">'+(stockPL>=0?'+':'▲')+Math.abs(stockPct).toFixed(1)+'%</div></div>'+
       '</div>'+
       '<div class="asset-total"><span class="at-label">💰 総資産</span>'+
         '<span><span class="at-amt">¥'+Math.round(totalEval).toLocaleString()+'</span>'+
-        '<span class="at-pct '+(totalPL>=0?'pos':'neg')+'">'+(totalPL>=0?'+':'')+totalPct.toFixed(1)+'%</span></span></div>';
+        '<span class="at-pct '+(totalPL>=0?'pos':'neg')+'">'+(totalPL>=0?'+':'▲')+Math.abs(totalPct).toFixed(1)+'%</span></span></div>';
   }
 
   const fa = document.getElementById('fundArea');
@@ -591,7 +702,7 @@ function renderAssets(){
       '<div class="fund-item">'+
         '<div class="fi-top"><span class="fi-ball">🌳</span>'+
           '<span class="fi-name">投資信託（コア資産）</span>'+
-          '<span class="fi-pct '+(fundPL>=0?'pos':'neg')+'">'+(fundPL>=0?'+':'')+fundPct.toFixed(1)+'%</span></div>'+
+          '<span class="fi-pct '+(fundPL>=0?'pos':'neg')+'">'+(fundPL>=0?'+':'▲')+Math.abs(fundPct).toFixed(1)+'%</span></div>'+
         '<div class="fund-gauge">'+bar+'<div class="fg-base" style="left:'+zeroPos+'%;"><span class="fg-lab">元本</span></div></div>'+
         '<div class="fi-money">'+
           '<div class="fm-box"><div class="fm-l">積み立てた元本</div><div class="fm-v">¥'+Math.round(fundCost).toLocaleString()+'</div></div>'+
@@ -607,6 +718,7 @@ function renderAssets(){
 
 function renderStocks(){
   renderAssets();
+  renderSectorDist();
   const grid = document.getElementById('boxGrid');
   const summary = document.getElementById('divSummary');
   if(stocks.length === 0){
@@ -641,14 +753,17 @@ function renderStocks(){
     const meta = stockMeta[s.code] || {};
     const ball = meta.cat==='配当ホールド型' ? '🔵' : meta.cat==='成長利確型' ? '🔴' : meta.cat==='インデックス' ? '🟢' : '🟡';
     const catcls = meta.cat==='配当ホールド型' ? 'cat-div' : meta.cat==='成長利確型' ? 'cat-grow' : meta.cat==='インデックス' ? 'cat-index' : 'cat-theme';
-    const plcls = s.plPct>=0 ? 'pos' : 'neg'; const sign = s.plPct>=0 ? '+' : '';
+    const plcls = s.plPct>=0 ? 'pos' : 'neg'; const sign = s.plPct>=0 ? '+' : '▲';
     const yld = (meta.yield!==undefined && meta.yield>0) ? meta.yield+'%' : '—';
     const div = s._annualDiv || 0;
+    const pm = meta.payMonths || [];
+    const payHtml = pm.length ? ('<div class="mc-paywrap">'+pm.map(function(mo){ return '<span class="mc-pay-item">'+mo+'月</span>'; }).join('')+'</div>') : '';
     const iconHtml = stockIcons[s.code] ? ('<img src="'+stockIcons[s.code]+'">') : ball;
     return '<div class="mon-cell '+catcls+'" onclick="openMon('+i+')">'+
       '<div class="mc-top"><span class="mc-ball">'+iconHtml+'</span><span class="mc-name">'+s.name+'</span><span class="mc-cat '+catcls+'">'+(meta.cat||'成長利確型')+'</span></div>'+
+      payHtml +
       '<div class="mc-qty">'+s.qty+'株 ・ 取得¥'+s.acq.toLocaleString()+'</div>'+
-      '<div class="mc-pl '+plcls+'">'+sign+s.plPct.toFixed(1)+'%</div>'+
+      '<div class="mc-pl '+plcls+'">'+sign+Math.abs(s.plPct).toFixed(1)+'%</div>'+
       '<div class="mc-sub"><span>評価額 <b>¥'+Math.round(s.evalAmt).toLocaleString()+'</b></span><span>利回り <b>'+yld+'</b></span></div>'+
       '<div class="mc-div">💴 年配当 ¥'+div.toLocaleString()+'</div>'+
     '</div>';
@@ -677,7 +792,7 @@ function openMon(i){
   let plGauge;
   if(s.plPct >= 0){ plGauge = '<div class="gauge-bar" style="left:'+zeroPos+'%; width:'+(plPos-zeroPos)+'%; background:#ef6a6a;"></div>'; }
   else { plGauge = '<div class="gauge-bar" style="left:'+plPos+'%; width:'+(zeroPos-plPos)+'%; background:#4aa3e8;"></div>'; }
-  const plMetric = '<div class="metric"><div class="metric-head"><span class="metric-label">📈 損益率</span><span class="metric-value '+(s.plPct>=0?'pos':'neg')+'">'+(s.plPct>=0?'+':'')+s.plPct.toFixed(1)+'%</span></div><div class="gauge">'+plGauge+'<div class="gauge-mark" style="left:'+zeroPos+'%;"><span class="gm-label">0%</span></div></div><div class="gauge-note">中央の線がゼロ。右にのびるほど利益、左は含み損</div></div>';
+  const plMetric = '<div class="metric"><div class="metric-head"><span class="metric-label">📈 損益率</span><span class="metric-value '+(s.plPct>=0?'pos':'neg')+'">'+(s.plPct>=0?'+':'▲')+Math.abs(s.plPct).toFixed(1)+'%</span></div><div class="gauge">'+plGauge+'<div class="gauge-mark" style="left:'+zeroPos+'%;"><span class="gm-label">0%</span></div></div><div class="gauge-note">中央の線がゼロ。右にのびるほど利益、左は含み損</div></div>';
 
   const yMax = 7; const yld = meta.yield || 0; const yPos = Math.min(100, yld / yMax * 100);
   let yMarks = ''; [2,3,4].forEach(function(v){ const p = v/yMax*100; yMarks += '<div class="gauge-mark" style="left:'+p+'%;"><span class="gm-label">'+v+'%</span></div>'; });
@@ -718,6 +833,162 @@ function openMon(i){
   document.getElementById('monModal').classList.add('show');
 }
 function closeMon(){ document.getElementById('monModal').classList.remove('show'); }
+
+/* ===== 業種タイプ（ポケモンのタイプ相性風） ===== */
+const codeType = {
+  '9432':'telecom','9434':'telecom','9433':'telecom',
+  '2914':'food',
+  '4503':'pharma',
+  '4063':'chemical','4452':'chemical',
+  '7011':'machinery','466A':'machinery',
+  '5713':'resource',
+  '8001':'trading','2768':'trading',
+  '8697':'finance','8593':'finance',
+  '7974':'game',
+  '9984':'tech',
+  '392A':'etf'
+};
+const sectorTypes = {
+  telecom: { name:'通信', emoji:'📡', color:'#06b6d4', character:'ディフェンシブ・高配当', short:'生活インフラの安定株',
+    desc:'NTT・KDDI・ソフトバンク（株）など。通信インフラは景気に左右されにくく、安定したキャッシュフローと高めの配当が魅力。成長は緩やかで、暴落時は守りの軸になりやすい。金利が上がると高配当株の相対的な魅力は薄れがち。',
+    react:{ yenLow:'ok', rateUp:'bad', resourceUp:'ok', boom:'bad', riskoff:'good' },
+    pair:'値動きが穏やかでポートフォリオの「土台」。ゲームやテックなど攻めの業種の振れをならす役。食品・医薬と並ぶ守りの代表。' },
+  food: { name:'食品・たばこ', emoji:'🍴', color:'#f59e0b', character:'ディフェンシブ・高配当', short:'不況に強い生活必需',
+    desc:'JTなど。生活必需・嗜好品は需要が安定し、不況に強く高配当。大きな成長は見込みにくい。海外売上が多い企業は円安が追い風。値上げで原材料高を価格転嫁しやすいのも強み。',
+    react:{ yenLow:'good', rateUp:'bad', resourceUp:'ok', boom:'bad', riskoff:'good' },
+    pair:'通信・医薬と並ぶ守りの代表。好景気では出遅れやすいが、相場が荒れると逃避先として買われやすい。' },
+  pharma: { name:'医薬', emoji:'💊', color:'#ec4899', character:'ディフェンシブ', short:'景気に左右されない薬',
+    desc:'アステラスなど。薬は景気に関係なく必要とされるディフェンシブの代表。新薬開発の成否で個別株は大きく振れることも。海外売上が多く、円安は追い風になりやすい。',
+    react:{ yenLow:'good', rateUp:'bad', resourceUp:'ok', boom:'bad', riskoff:'good' },
+    pair:'守りの業種。攻めのグロースと組み合わせると、相場が崩れたときの下支えになる。' },
+  chemical: { name:'化学・素材', emoji:'🧪', color:'#84cc16', character:'銘柄で二面性', short:'半導体材料〜生活必需まで',
+    desc:'信越化学・花王など。同じ「化学」でも、信越＝半導体材料で景気敏感のグロース寄り、花王＝生活必需でディフェンシブ寄りと、性格が分かれるのが面白いところ。原材料（資源）高はコスト増で逆風になりやすい。',
+    react:{ yenLow:'good', rateUp:'ok', resourceUp:'bad', boom:'good', riskoff:'bad' },
+    pair:'半導体材料系は機械・テックと連動しやすく、生活必需系は通信・食品と連動しやすい。中身で見極めるのがコツ。' },
+  machinery: { name:'機械・防衛', emoji:'⚙️', color:'#8b5cf6', character:'景気敏感・テーマ', short:'設備投資・国策で動く',
+    desc:'三菱重工・防衛ETFなど。設備投資や国策（防衛費の増額など）に業績が連動。好景気と円安（輸出）が追い風。原材料高はコスト増で逆風。景気サイクルに合わせて大きく動く。',
+    react:{ yenLow:'good', rateUp:'ok', resourceUp:'bad', boom:'good', riskoff:'bad' },
+    pair:'好況局面の主役になりやすく、後退局面では先に売られやすい。ディフェンシブと組むとサイクルをならせる。' },
+  resource: { name:'資源・非鉄', emoji:'⛏️', color:'#b07ae0', character:'市況・シクリカル', short:'資源価格に直結',
+    desc:'住友金属鉱山など。金属や資源の価格に業績が直結する。資源高・インフレ・円安が追い風で、世界景気の減速が逆風。値動きは市況次第で荒くなりやすい。',
+    react:{ yenLow:'good', rateUp:'ok', resourceUp:'good', boom:'good', riskoff:'bad' },
+    pair:'ディフェンシブとは逆の値動きをしやすく、インフレ局面のヘッジになる。商社と近い動き。' },
+  trading: { name:'商社', emoji:'🏢', color:'#d97706', character:'市況・高配当', short:'資源と配当の総合力',
+    desc:'三菱商事・双日など。資源・エネルギー・食料など幅広く扱い、資源高と円安が追い風。配当が手厚い銘柄が多い。バフェットが日本の商社をまとめて買ったことでも有名。',
+    react:{ yenLow:'good', rateUp:'ok', resourceUp:'good', boom:'good', riskoff:'bad' },
+    pair:'資源・非鉄と連動しやすく、配当の柱にもなる。市況が読めると先回りしやすい。' },
+  finance: { name:'金融', emoji:'🏦', color:'#3b82f6', character:'金利敏感', short:'金利が上がると稼ぐ',
+    desc:'JPX・リース・銀行など。金利が上がると利ざやが広がって儲かりやすい、数少ない「金利上昇に強い」業種。景気拡大も追い風。グロースとはシーソーの関係になりやすい。',
+    react:{ yenLow:'ok', rateUp:'good', resourceUp:'ok', boom:'good', riskoff:'bad' },
+    pair:'金利上昇局面では、グロースから金融へ資金が流れ込みやすい。両方持つと金利がどちらに動いても崩れにくい。' },
+  game: { name:'ゲーム・エンタメ', emoji:'🎮', color:'#ef6a6a', character:'グロース', short:'ヒットとIPで伸びる',
+    desc:'任天堂など。ヒット作やIP（キャラ・作品）の強さで業績が動く、成長期待で買われるグロース。世界展開する企業は円安が追い風。金利上昇局面ではグロース全般とともに売られやすい。',
+    react:{ yenLow:'good', rateUp:'bad', resourceUp:'ok', boom:'good', riskoff:'bad' },
+    pair:'グロースの一角。ヒット次第で個別の振れが大きい。守りの業種と組み合わせて振れをならすのが定石。' },
+  tech: { name:'投資・テック', emoji:'🌐', color:'#6366f1', character:'ハイリスク・グロース', short:'AI・世界テックと連動',
+    desc:'ソフトバンクグループなど。AIやスタートアップへの巨額投資で、世界のテック株と運命を共にする。値動きが非常に大きく、低金利・好景気で伸び、金利上昇やリスクオフで大きく下げやすい。',
+    react:{ yenLow:'ok', rateUp:'bad', resourceUp:'bad', boom:'good', riskoff:'bad' },
+    pair:'ポートフォリオの「攻め」担当。通信・食品など守りの業種と組み合わせて、全体の振れをならすのが大事。' },
+  etf: { name:'ETF・米国株', emoji:'📈', color:'#1a9e5c', character:'インデックス・分散', short:'1本で分散できる核',
+    desc:'米国ハイテクETFなど。1本で多くの銘柄に分散投資できる。中身がテック寄りだと金利の影響を受けやすく、円換算なので為替（円安／円高）の影響も受ける。',
+    react:{ yenLow:'good', rateUp:'bad', resourceUp:'ok', boom:'good', riskoff:'bad' },
+    pair:'個別株の土台・分散の核。これを軸に、興味のある業種を個別株で足していくスタイルと相性がいい。' }
+};
+const macroFactors = [
+  { key:'yenLow',     emoji:'💴', name:'円安', label:'円安が進む' },
+  { key:'rateUp',     emoji:'📈', name:'金利↑', label:'金利が上がる' },
+  { key:'resourceUp', emoji:'🛢️', name:'資源高', label:'資源高・インフレ' },
+  { key:'boom',       emoji:'🌱', name:'好景気', label:'景気が拡大する' },
+  { key:'riskoff',    emoji:'⚡', name:'暴落', label:'リスクオフ（暴落）' }
+];
+const reactSign = { good:{cls:'mx-good',t:'◎'}, ok:{cls:'mx-ok',t:'○'}, bad:{cls:'mx-bad',t:'▼'} };
+
+function renderSectorDist(){
+  const el = document.getElementById('sectorDist');
+  if(stocks.length === 0){ el.innerHTML = ''; return; }
+  const totals = {}; let grand = 0;
+  stocks.forEach(function(s){ const k = codeType[s.code]; if(!sectorTypes[k]) return; totals[k] = (totals[k]||0) + s.evalAmt; grand += s.evalAmt; });
+  if(grand <= 0){ el.innerHTML = ''; return; }
+  const allKeys = Object.keys(sectorTypes);
+  const ownedKeys = allKeys.filter(function(k){ return totals[k] > 0; });
+  const emptyKeys = allKeys.filter(function(k){ return !totals[k]; });
+  const sortedOwned = ownedKeys.slice().sort(function(a,b){ return totals[b]-totals[a]; });
+  const stackBar = sortedOwned.map(function(k){ const pct = totals[k]/grand*100; return '<div class="sd-seg" style="width:'+pct+'%; background:'+sectorTypes[k].color+'"></div>'; }).join('');
+  const topK = sortedOwned[0]; const topPct = totals[topK]/grand*100;
+  const rows = allKeys.map(function(k){
+    const t = sectorTypes[k]; const amt = totals[k]||0; const pct = amt/grand*100; const owned = amt > 0;
+    const barW = owned ? Math.max(4, pct) : 0;
+    const right = owned ? (pct.toFixed(0)+'%') : '<span class="cov-empty-badge">未保有</span>';
+    const amtBig = owned ? ('<span class="cov-amt-big">¥'+Math.round(amt).toLocaleString()+'</span>') : '';
+    return '<div class="cov-row '+(owned?'':'is-empty')+'" onclick="openZukan(\''+k+'\')">'+
+      '<span class="cov-emoji" style="background:'+(owned?t.color:'#ddd0d3')+'">'+t.emoji+'</span>'+
+      '<div class="cov-mid">'+
+        '<div class="cov-row-top"><span class="cov-name">'+t.name+' <span class="cov-char">'+t.character+'</span></span><span class="cov-figs">'+amtBig+'<span class="cov-right">'+right+'</span></span></div>'+
+        '<div class="cov-track"><div class="cov-bar" style="width:'+barW+'%; background:'+t.color+'"></div></div>'+
+      '</div></div>';
+  }).join('');
+  let summary = '今いちばん厚いのは <b style="color:'+sectorTypes[topK].color+'">'+sectorTypes[topK].name+'</b>（'+topPct.toFixed(0)+'%）。';
+  if(emptyKeys.length > 0){ summary += '未保有は <b>'+emptyKeys.length+'業界</b>（'+emptyKeys.map(function(k){ return sectorTypes[k].name; }).join('・')+'）。ここが分散の伸びしろ。'; }
+  else { summary += '全11業界をカバーできています👏'; }
+  el.innerHTML = '<div class="sector-dist">'+
+    '<div class="sd-head"><span class="sd-title">🧩 業界カバレッジ（個別株）</span><span class="cov-count">'+ownedKeys.length+' / '+allKeys.length+' 業界</span></div>'+
+    '<div class="sd-bar">'+stackBar+'</div>'+
+    '<div class="cov-summary">'+summary+'</div>'+
+    '<div class="cov-list">'+rows+'</div>'+
+  '</div>';
+}
+
+function renderZukan(){
+  const grid = document.getElementById('zukanGrid');
+  grid.innerHTML = Object.keys(sectorTypes).map(function(k){
+    const t = sectorTypes[k];
+    const goods = macroFactors.filter(function(f){ return t.react[f.key]==='good'; }).slice(0,2);
+    const bads = macroFactors.filter(function(f){ return t.react[f.key]==='bad'; }).slice(0,1);
+    let tags = goods.map(function(g){ return '<span class="zc-tag good">◎'+g.emoji+g.name+'</span>'; }).join('');
+    tags += bads.map(function(b){ return '<span class="zc-tag bad">▼'+b.emoji+b.name+'</span>'; }).join('');
+    return '<div class="zukan-card" style="border-top-color:'+t.color+'" onclick="openZukan(\''+k+'\')">'+
+      '<div class="zc-top"><span class="zc-emoji">'+t.emoji+'</span><span class="zc-name" style="color:'+t.color+'">'+t.name+'</span></div>'+
+      '<div class="zc-char" style="color:'+t.color+'">'+t.character+'</div>'+
+      '<div class="zc-desc">'+t.short+'</div>'+
+      '<div class="zc-tags">'+tags+'</div>'+
+    '</div>';
+  }).join('');
+  let head = '<tr><th></th>'+macroFactors.map(function(f){ return '<th><span class="mh-emoji">'+f.emoji+'</span>'+f.name+'</th>'; }).join('')+'</tr>';
+  let rows = Object.keys(sectorTypes).map(function(k){
+    const t = sectorTypes[k];
+    const cells = macroFactors.map(function(f){ const s = reactSign[t.react[f.key]]; return '<td><span class="mx-cell '+s.cls+'">'+s.t+'</span></td>'; }).join('');
+    return '<tr><th><span class="mt-emoji">'+t.emoji+'</span>'+t.name+'</th>'+cells+'</tr>';
+  }).join('');
+  document.getElementById('matrixArea').innerHTML = '<table class="matrix"><thead>'+head+'</thead><tbody>'+rows+'</tbody></table>';
+}
+
+function openZukan(k){
+  const t = sectorTypes[k];
+  const reactLabels = { good:{cls:'good',t:'◎ 追い風'}, ok:{cls:'ok',t:'○ ふつう'}, bad:{cls:'bad',t:'▼ 向かい風'} };
+  const reactRows = macroFactors.map(function(f){
+    const r = reactLabels[t.react[f.key]];
+    return '<div class="zm-react-row"><span class="zm-react-emoji">'+f.emoji+'</span><span class="zm-react-label">'+f.label+'</span><span class="zm-react-badge '+r.cls+'">'+r.t+'</span></div>';
+  }).join('');
+  const holds = stocks.filter(function(s){ return codeType[s.code] === k; });
+  let holdHtml;
+  if(holds.length === 0){ holdHtml = '<div class="zm-hold-empty">この業種の手持ちはまだなし</div>'; }
+  else { holdHtml = holds.map(function(s){ return '<div class="zm-hold-item"><span class="zm-hold-name">'+s.name+'</span><span class="zm-hold-amt">¥'+Math.round(s.evalAmt).toLocaleString()+'</span></div>'; }).join(''); }
+  document.getElementById('zukanModalInner').innerHTML =
+    '<div class="zukan-modal-head" style="background:linear-gradient(135deg,'+t.color+','+t.color+'cc)">'+
+      '<div class="zh-left"><span class="zh-emoji">'+t.emoji+'</span><div><div class="zh-name">'+t.name+'</div><div class="zh-kind">'+t.character+' ・ '+t.short+'</div></div></div>'+
+      '<button class="zh-close" onclick="closeZukan()">✕</button></div>'+
+    '<div class="zukan-modal-body">'+
+      '<div class="zm-desc">'+t.desc+'</div>'+
+      '<div class="zm-sec-title">📊 局面ごとの効きかた</div>'+
+      '<div class="zm-react">'+reactRows+'</div>'+
+      '<div class="zm-sec-title">🤝 ほかのタイプとの関係</div>'+
+      '<div class="zm-pair"><div class="zm-pair-title">相性メモ</div><div class="zm-pair-text">'+t.pair+'</div></div>'+
+      '<div class="zm-sec-title">📦 この業種の手持ち</div>'+
+      '<div class="zm-holdings">'+holdHtml+'</div>'+
+    '</div>';
+  document.getElementById('zukanModal').classList.add('show');
+}
+function closeZukan(){ document.getElementById('zukanModal').classList.remove('show'); }
 
 function calcStreak(){
   if(data.memos.length === 0) return 0;
@@ -895,7 +1166,7 @@ document.getElementById('importFile').addEventListener('change', function(e){
 });
 
 document.getElementById('d').value = new Date().toISOString().slice(0,10);
-load(); applyImages(); applyProfile(); renderStocks(); renderQuotes();
+load(); applyImages(); applyProfile(); renderStocks(); renderQuotes(); renderZukan();
 prevLevel = getRank(data.memos.length).idx + 1;
 render(true);
 </script>
